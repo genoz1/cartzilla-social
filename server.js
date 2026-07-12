@@ -23,7 +23,7 @@ app.listen(PORT, () => {
   console.log(`Cartzilla social automation running on port ${PORT}`);
 });
 
-const hasShopifyCreds = !!(process.env.CARTZILLA_SHOPIFY_STORE_DOMAIN && process.env.CARTZILLA_SHOPIFY_ADMIN_TOKEN);
+const hasShopifyCreds = !!(process.env.CARTZILLA_SHOPIFY_STORE_DOMAIN && process.env.CARTZILLA_SHOPIFY_CLIENT_ID && process.env.CARTZILLA_SHOPIFY_CLIENT_SECRET);
 const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
 const hasSupabase = !!(process.env.CARTZILLA_SUPABASE_URL && process.env.CARTZILLA_SUPABASE_SERVICE_KEY);
 
@@ -51,5 +51,5 @@ if (hasShopifyCreds && hasAnthropicKey && hasSupabase) {
 
   console.log(`Cartzilla posts scheduled: 10am (educational) and 6pm (spotlight) Eastern daily. LIVE MODE is ${process.env.CARTZILLA_LIVE_MODE === 'true' ? 'ON — real posts will publish.' : 'OFF — runs will log/dry-run only.'}`);
 } else {
-  console.log('Cartzilla posting NOT scheduled — set CARTZILLA_SHOPIFY_STORE_DOMAIN, CARTZILLA_SHOPIFY_ADMIN_TOKEN, ANTHROPIC_API_KEY, CARTZILLA_SUPABASE_URL, and CARTZILLA_SUPABASE_SERVICE_KEY to enable.');
+  console.log('Cartzilla posting NOT scheduled — set CARTZILLA_SHOPIFY_STORE_DOMAIN, CARTZILLA_SHOPIFY_CLIENT_ID, CARTZILLA_SHOPIFY_CLIENT_SECRET, ANTHROPIC_API_KEY, CARTZILLA_SUPABASE_URL, and CARTZILLA_SUPABASE_SERVICE_KEY to enable.');
 }
