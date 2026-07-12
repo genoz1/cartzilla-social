@@ -1,0 +1,23 @@
+{
+  "name": "cartzilla-social",
+  "version": "1.0.0",
+  "description": "Automated social posting for Cartzilla Golf Cart Parts & Accessories (Shopify) - completely separate from Florida Buzz",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test-mode": "node scripts/test-mode.js",
+    "post-educational": "node scripts/post-educational.js",
+    "post-educational:dry": "DRY_RUN=true node scripts/post-educational.js",
+    "post-spotlight": "node scripts/post-spotlight.js",
+    "post-spotlight:dry": "DRY_RUN=true node scripts/post-spotlight.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-cron": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
