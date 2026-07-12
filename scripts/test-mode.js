@@ -66,10 +66,10 @@ const SAMPLE_PRODUCTS = [
 ];
 
 async function getTestProducts() {
-  const shopifyConfigured = process.env.CARTZILLA_SHOPIFY_STORE_DOMAIN && process.env.CARTZILLA_SHOPIFY_ADMIN_TOKEN;
+  const shopifyConfigured = process.env.CARTZILLA_SHOPIFY_STORE_DOMAIN && process.env.CARTZILLA_SHOPIFY_CLIENT_ID && process.env.CARTZILLA_SHOPIFY_CLIENT_SECRET;
 
   if (!shopifyConfigured) {
-    console.log('CARTZILLA_SHOPIFY_STORE_DOMAIN / CARTZILLA_SHOPIFY_ADMIN_TOKEN not set.');
+    console.log('CARTZILLA_SHOPIFY_STORE_DOMAIN / CARTZILLA_SHOPIFY_CLIENT_ID / CARTZILLA_SHOPIFY_CLIENT_SECRET not set.');
     console.log('Using 5 built-in SAMPLE products so you can see the pipeline work end-to-end.');
     console.log('Once your Shopify credentials are set, this will pull your real catalog instead.\n');
     return { products: SAMPLE_PRODUCTS.slice(0, TEST_PRODUCT_COUNT), isSample: true };
