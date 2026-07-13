@@ -9,7 +9,10 @@
     "post-educational": "node scripts/post-educational.js",
     "post-educational:dry": "DRY_RUN=true node scripts/post-educational.js",
     "post-spotlight": "node scripts/post-spotlight.js",
-    "post-spotlight:dry": "DRY_RUN=true node scripts/post-spotlight.js"
+    "post-spotlight:dry": "DRY_RUN=true node scripts/post-spotlight.js",
+    "post-category-howto": "node scripts/post-category-howto.js",
+    "post-category-howto:dry": "DRY_RUN=true node scripts/post-category-howto.js",
+    "test-mode-category": "node scripts/test-mode-category.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
