@@ -13,6 +13,12 @@
     </div>
     <% } %>
 
+    <% if (article.category === 'tutorials' || article.category === 'troubleshooting') { %>
+    <div class="safety-disclaimer">
+      <strong>⚠ Safety Note:</strong> Working on golf cart electrical and mechanical systems carries real risks, including electric shock, battery acid exposure, and injury from moving parts. This guide is for informational purposes only — if you're not fully confident performing this work safely, have a qualified technician handle it instead. Cartzilla is not responsible for injury or damage resulting from work performed based on this guide.
+    </div>
+    <% } %>
+
     <div class="article-body"><%- article.body_html %></div>
 
     <% if (article.source_name) { %>
