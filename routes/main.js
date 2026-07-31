@@ -11,6 +11,28 @@ const CATEGORY_LABELS = {
 };
 const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS);
 
+router.get('/sitemap.xml', async (req, res) => {
+  const SITE_URL = process.env.SITE_URL || 'https://cartzillagolfcart.com';
+  const staticPaths = ['/', '/about', '/videos', ...CATEGORY_ORDER.map((c) => `/category/${c}`)];
+
+  let articleSlugs = [];
+  if (supabase) {
+    const { data } = await supabase.from('cartzilla_articles').select('slug, published_at').order('published_at', { ascending: false });
+    articleSlugs = data || [];
+  }
+
+  const urls = [
+    ...staticPaths.map((path) => `  <url><loc>${SITE_URL}${path}</loc></url>`),
+    ...articleSlugs.map((a) => `  <url><loc>${SITE_URL}/article/${a.slug}</loc><lastmod>${new Date(a.published_at).toISOString().split('T')[0]}</lastmod></url>`),
+  ];
+
+  res.set('Content-Type', 'application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
+</urlset>`);
+});
+
 router.get('/', async (req, res) => {
   let articles = [];
   if (supabase) {
