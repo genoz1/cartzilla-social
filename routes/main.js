@@ -69,4 +69,16 @@ router.get('/about', (req, res) => {
   res.render('about');
 });
 
+router.get('/videos', async (req, res) => {
+  let videos = [];
+  if (supabase) {
+    const { data } = await supabase
+      .from('cartzilla_videos')
+      .select('*')
+      .order('added_at', { ascending: false });
+    videos = data || [];
+  }
+  res.render('videos', { videos, category: 'videos' });
+});
+
 module.exports = router;
