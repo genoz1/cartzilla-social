@@ -30,7 +30,7 @@ body {
 .nav {
   background: var(--black);
   border-bottom: 2px solid var(--lime);
-  padding: 14px 0;
+  padding: 10px 0;
 }
 .nav .wrap {
   display: flex;
@@ -45,7 +45,7 @@ body {
   text-decoration: none;
 }
 .logo-img {
-  height: 64px;
+  height: 120px;
   width: auto;
   display: block;
 }
@@ -186,6 +186,27 @@ body {
   padding-top: 12px;
   margin-top: 24px;
 }
+.safety-disclaimer {
+  margin: 20px 0;
+  padding: 16px 18px;
+  background: var(--near-black);
+  border: 1px solid #4a3a10;
+  border-left: 4px solid #d4a017;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--gray-300);
+}
+.safety-disclaimer strong { color: #e8c05a; }
+.reference-material {
+  margin: 20px 0;
+  padding: 16px 18px;
+  background: var(--near-black);
+  border: 1px solid #262626;
+  border-left: 4px solid var(--lime);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--gray-300);
+}
 .product-cta {
   margin: 28px 0;
   padding: 20px;
@@ -284,7 +305,51 @@ footer .wrap {
 }
 .category-hero .section-title { font-size: 34px; }
 
+/* Mobile menu toggle */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.menu-toggle span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: var(--lime);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.menu-toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.menu-toggle.open span:nth-child(2) { opacity: 0; }
+.menu-toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: var(--near-black);
+  border-top: 1px solid #262626;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  border-bottom: 1px solid #262626;
+}
+.mobile-menu a:hover { color: var(--lime); }
+
 @media (max-width: 640px) {
   .nav-links { display: none; }
+  .menu-toggle { display: flex; }
   .hero h1 { font-size: 32px; }
 }
