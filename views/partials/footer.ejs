@@ -1,0 +1,11 @@
+  <footer>
+    <div class="wrap">
+      <span>&copy; <%= new Date().getFullYear() %> Cartzilla. Golf cart news, tutorials, and buying guides.</span>
+      <span>
+        <a href="/about">About</a> &middot;
+        <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop Parts & Accessories</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>
