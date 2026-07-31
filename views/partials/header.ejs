@@ -41,7 +41,42 @@
         <a href="/category/troubleshooting" class="<%= typeof category !== 'undefined' && category === 'troubleshooting' ? 'active' : '' %>">Troubleshooting</a>
         <a href="/category/buying-guides" class="<%= typeof category !== 'undefined' && category === 'buying-guides' ? 'active' : '' %>">Buying Guides</a>
         <a href="/category/reviews" class="<%= typeof category !== 'undefined' && category === 'reviews' ? 'active' : '' %>">Reviews</a>
+        <a href="/videos" class="<%= typeof category !== 'undefined' && category === 'videos' ? 'active' : '' %>">How-To Videos</a>
         <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop</a>
       </div>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="/category/news">News</a>
+      <a href="/category/tutorials">Tutorials</a>
+      <a href="/category/troubleshooting">Troubleshooting</a>
+      <a href="/category/buying-guides">Buying Guides</a>
+      <a href="/category/reviews">Reviews</a>
+      <a href="/videos">How-To Videos</a>
+      <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop</a>
     </div>
   </nav>
+
+  <script>
+    (function () {
+      var toggle = document.getElementById('menuToggle');
+      var menu = document.getElementById('mobileMenu');
+      if (!toggle || !menu) return;
+      toggle.addEventListener('click', function () {
+        var isOpen = menu.classList.toggle('open');
+        toggle.classList.toggle('open', isOpen);
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+      });
+      menu.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+          menu.classList.remove('open');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-label', 'Open menu');
+        });
+      });
+    })();
+  </script>
