@@ -1,0 +1,25 @@
+<%- include('partials/header', { pageTitle: 'Cartzilla — Golf Cart News, Tutorials & Buying Guides', pageDescription: 'Golf cart news, tutorials, troubleshooting guides, and buying advice.', canonicalPath: '/' }) %>
+
+<main class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Latest</span>
+    </div>
+    <% if (articles && articles.length) { %>
+    <div class="grid">
+      <% articles.forEach(a => { %>
+        <a href="/article/<%= a.slug %>" class="card">
+          <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+          <span class="eyebrow" style="margin: 12px 14px 0;"><%= categoryLabels[a.category] || a.category %></span>
+          <h3><%= a.title %></h3>
+          <p class="dek-sm"><%= a.dek %></p>
+        </a>
+      <% }) %>
+    </div>
+    <% } else { %>
+      <p>No articles published yet — check back soon.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>
