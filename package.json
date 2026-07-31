@@ -16,6 +16,7 @@
     "write-article:dry": "DRY_RUN=true node scripts/write-article.js",
     "write-news": "node scripts/write-news.js",
     "write-news:dry": "DRY_RUN=true node scripts/write-news.js",
+    "regenerate-placeholder-images": "node scripts/regenerate-placeholder-images.js",
     "test-mode-category": "node scripts/test-mode-category.js"
   },
   "dependencies": {
