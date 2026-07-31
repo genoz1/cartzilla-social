@@ -13,12 +13,6 @@
     </div>
     <% } %>
 
-    <% if (article.category === 'tutorials' || article.category === 'troubleshooting') { %>
-    <div class="safety-disclaimer">
-      <strong>⚠ Safety Note:</strong> Working on golf cart electrical and mechanical systems carries real risks, including electric shock, battery acid exposure, and injury from moving parts. This guide is for informational purposes only — if you're not fully confident performing this work safely, have a qualified technician handle it instead. Cartzilla is not responsible for injury or damage resulting from work performed based on this guide.
-    </div>
-    <% } %>
-
     <div class="article-body"><%- article.body_html %></div>
 
     <% if (article.source_name) { %>
@@ -33,6 +27,20 @@
       <p style="margin: 0 0 4px; font-weight: 600;">Related product</p>
       <p style="margin: 0 0 10px;"><%= article.product_title || 'See this on Cartzilla' %></p>
       <a href="<%= article.product_url %>" class="btn" target="_blank" rel="noopener">View on Cartzilla &rarr;</a>
+    </div>
+    <% } %>
+
+    <% if (article.category === 'tutorials' || article.category === 'troubleshooting') { %>
+    <div class="reference-material">
+      <p style="margin: 0 0 8px; font-weight: 600; color: var(--lime);">📄 Reference Material</p>
+      <p style="margin: 0 0 6px;">Looking for a wiring diagram for your specific model? <a href="https://www.google.com/search?q=<%= encodeURIComponent(article.title + ' wiring diagram') %>&tbm=isch" target="_blank" rel="noopener" style="color: var(--white); text-decoration: underline;">Search wiring diagrams &rarr;</a></p>
+      <p style="margin: 0;">Need the full service manual? <a href="https://www.google.com/search?q=<%= encodeURIComponent(article.title + ' service manual pdf') %>" target="_blank" rel="noopener" style="color: var(--white); text-decoration: underline;">Search service manuals &rarr;</a></p>
+    </div>
+    <% } %>
+
+    <% if (article.category === 'tutorials' || article.category === 'troubleshooting') { %>
+    <div class="safety-disclaimer">
+      <strong>⚠ Safety Note:</strong> Working on golf cart electrical and mechanical systems carries real risks, including electric shock, battery acid exposure, and injury from moving parts. This guide is for informational purposes only — if you're not fully confident performing this work safely, have a qualified technician handle it instead. Cartzilla is not responsible for injury or damage resulting from work performed based on this guide.
     </div>
     <% } %>
 
