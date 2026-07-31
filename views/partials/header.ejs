@@ -1,1 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Cartzilla — Golf Cart News, Tutorials & Guides' %></title>
+  <meta name="description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Golf cart news, tutorials, troubleshooting guides, and buying advice.' %>">
+  <link rel="canonical" href="<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') + (typeof canonicalPath !== 'undefined' && canonicalPath ? canonicalPath : '') %>">
+  <link rel="icon" type="image/png" href="/img/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
 
+  <% if (process.env.GA4_MEASUREMENT_ID) { %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= process.env.GA4_MEASUREMENT_ID %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<%= process.env.GA4_MEASUREMENT_ID %>');
+  </script>
+  <% } %>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Cartzilla",
+    "url": "<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') %>"
+  }
+  </script>
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a href="/" class="logo"><img src="/img/logo.png" alt="Cartzilla" class="logo-img"></a>
+      <div class="nav-links">
+        <a href="/category/news" class="<%= typeof category !== 'undefined' && category === 'news' ? 'active' : '' %>">News</a>
+        <a href="/category/tutorials" class="<%= typeof category !== 'undefined' && category === 'tutorials' ? 'active' : '' %>">Tutorials</a>
+        <a href="/category/troubleshooting" class="<%= typeof category !== 'undefined' && category === 'troubleshooting' ? 'active' : '' %>">Troubleshooting</a>
+        <a href="/category/buying-guides" class="<%= typeof category !== 'undefined' && category === 'buying-guides' ? 'active' : '' %>">Buying Guides</a>
+        <a href="/category/reviews" class="<%= typeof category !== 'undefined' && category === 'reviews' ? 'active' : '' %>">Reviews</a>
+        <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop</a>
+      </div>
+    </div>
+  </nav>
