@@ -6,6 +6,21 @@
   <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Cartzilla — Golf Cart News, Tutorials & Guides' %></title>
   <meta name="description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Golf cart news, tutorials, troubleshooting guides, and buying advice.' %>">
   <link rel="canonical" href="<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') + (typeof canonicalPath !== 'undefined' && canonicalPath ? canonicalPath : '') %>">
+
+  <!-- Open Graph — controls how links look when shared on Facebook, Threads, etc. -->
+  <meta property="og:type" content="<%= typeof canonicalPath !== 'undefined' && canonicalPath && canonicalPath.startsWith('/article/') ? 'article' : 'website' %>">
+  <meta property="og:site_name" content="Cartzilla">
+  <meta property="og:title" content="<%= typeof pageTitle !== 'undefined' ? pageTitle : 'Cartzilla — Golf Cart News, Tutorials & Guides' %>">
+  <meta property="og:description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Golf cart news, tutorials, troubleshooting guides, and buying advice.' %>">
+  <meta property="og:url" content="<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') + (typeof canonicalPath !== 'undefined' && canonicalPath ? canonicalPath : '') %>">
+  <meta property="og:image" content="<%= typeof pageImage !== 'undefined' && pageImage ? pageImage : (process.env.SITE_URL || 'https://cartzillagolfcart.com') + '/img/logo.png' %>">
+
+  <!-- Twitter/X Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= typeof pageTitle !== 'undefined' ? pageTitle : 'Cartzilla — Golf Cart News, Tutorials & Guides' %>">
+  <meta name="twitter:description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Golf cart news, tutorials, troubleshooting guides, and buying advice.' %>">
+  <meta name="twitter:image" content="<%= typeof pageImage !== 'undefined' && pageImage ? pageImage : (process.env.SITE_URL || 'https://cartzillagolfcart.com') + '/img/logo.png' %>">
+
   <link rel="icon" type="image/png" href="/img/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
