@@ -70,15 +70,18 @@ router.get('/about', (req, res) => {
 });
 
 router.get('/videos', async (req, res) => {
+  const q = (req.query.q || '').trim();
   let videos = [];
   if (supabase) {
-    const { data } = await supabase
-      .from('cartzilla_videos')
-      .select('*')
-      .order('added_at', { ascending: false });
+    let query = supabase.from('cartzilla_videos').select('*').order('added_at', { ascending: false });
+    if (q) {
+      // Matches against title OR channel name, case-insensitive
+      query = query.or(`title.ilike.%${q}%,channel_name.ilike.%${q}%`);
+    }
+    const { data } = await query;
     videos = data || [];
   }
-  res.render('videos', { videos, category: 'videos' });
+  res.render('videos', { videos, category: 'videos', searchQuery: q });
 });
 
 module.exports = router;
