@@ -82,6 +82,20 @@ if (hasShopifyCreds && hasAnthropicKey && hasSupabase) {
     }, { timezone: 'America/New_York' });
     console.log('Cartzilla article writer also scheduled: 9am Eastern daily.');
   }
+
+  // Opt-in separately: pulls from real golf cart industry RSS sources
+  // (scripts/sources.js) and writes honest, source-credited news summaries.
+  // Review a dry-run batch via `npm run write-news:dry` before enabling.
+  if (process.env.CARTZILLA_WRITE_NEWS_ENABLED === 'true') {
+    cron.schedule('30 8,16 * * *', () => {
+      console.log('Running scheduled Cartzilla news writer...');
+      require('child_process').exec('node scripts/write-news.js', (err, stdout, stderr) => {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+      });
+    }, { timezone: 'America/New_York' });
+    console.log('Cartzilla news writer also scheduled: 8:30am and 4:30pm Eastern daily.');
+  }
 } else {
   console.log('Cartzilla posting NOT scheduled — set CARTZILLA_SHOPIFY_STORE_DOMAIN, CARTZILLA_SHOPIFY_CLIENT_ID, CARTZILLA_SHOPIFY_CLIENT_SECRET, ANTHROPIC_API_KEY, CARTZILLA_SUPABASE_URL, and CARTZILLA_SUPABASE_SERVICE_KEY to enable.');
 }

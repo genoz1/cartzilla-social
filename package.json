@@ -14,6 +14,8 @@
     "post-category-howto:dry": "DRY_RUN=true node scripts/post-category-howto.js",
     "write-article": "node scripts/write-article.js",
     "write-article:dry": "DRY_RUN=true node scripts/write-article.js",
+    "write-news": "node scripts/write-news.js",
+    "write-news:dry": "DRY_RUN=true node scripts/write-news.js",
     "test-mode-category": "node scripts/test-mode-category.js"
   },
   "dependencies": {
@@ -21,7 +23,8 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "rss-parser": "^3.13.0"
   },
   "engines": {
     "node": ">=18.0.0"
