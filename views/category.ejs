@@ -1,0 +1,24 @@
+<%- include('partials/header', { pageTitle: categoryLabels[category] + ' — Cartzilla', pageDescription: 'Cartzilla ' + categoryLabels[category] + ' — golf cart articles and guides.', canonicalPath: '/category/' + category, category }) %>
+
+<main class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title"><%= categoryLabels[category] %></span>
+    </div>
+    <% if (articles && articles.length) { %>
+    <div class="grid">
+      <% articles.forEach(a => { %>
+        <a href="/article/<%= a.slug %>" class="card">
+          <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+          <h3><%= a.title %></h3>
+          <p class="dek-sm"><%= a.dek %></p>
+        </a>
+      <% }) %>
+    </div>
+    <% } else { %>
+      <p>Nothing published in this category yet — check back soon.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>
