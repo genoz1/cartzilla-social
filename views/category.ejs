@@ -1,10 +1,13 @@
 <%- include('partials/header', { pageTitle: categoryLabels[category] + ' — Cartzilla', pageDescription: 'Cartzilla ' + categoryLabels[category] + ' — golf cart articles and guides.', canonicalPath: '/category/' + category, category }) %>
 
+<section class="category-hero">
+  <div class="wrap">
+    <span class="section-title"><%= categoryLabels[category] %></span>
+  </div>
+</section>
+
 <main class="wrap">
   <section class="section">
-    <div class="section-head">
-      <span class="section-title"><%= categoryLabels[category] %></span>
-    </div>
     <% if (articles && articles.length) { %>
     <div class="grid">
       <% articles.forEach(a => { %>
@@ -16,7 +19,7 @@
       <% }) %>
     </div>
     <% } else { %>
-      <p>Nothing published in this category yet — check back soon.</p>
+      <p style="padding: 20px 0;">Nothing published in this category yet — check back soon.</p>
     <% } %>
   </section>
 </main>
