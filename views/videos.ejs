@@ -1,0 +1,33 @@
+<%- include('partials/header', { pageTitle: 'How-To Videos — Cartzilla', pageDescription: 'Real golf cart repair and how-to videos, credited to their original creators.', canonicalPath: '/videos', category: 'videos' }) %>
+
+<section class="category-hero">
+  <div class="wrap">
+    <span class="section-title">🎥 How-To Videos</span>
+  </div>
+</section>
+
+<main class="wrap">
+  <section class="section">
+    <p style="color: var(--gray-300); max-width: 640px; margin-bottom: 24px;">
+      Real repair and how-to videos from creators who actually know golf carts — embedded directly
+      from YouTube with full credit to whoever made them. We don't re-upload or claim these as our own.
+    </p>
+    <% if (videos && videos.length) { %>
+    <div class="grid">
+      <% videos.forEach(v => { %>
+        <div class="card" style="cursor: default;">
+          <div style="position: relative; padding-top: 56.25%;">
+            <iframe src="https://www.youtube.com/embed/<%= v.youtube_id %>" title="<%= v.title %>" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <h3><%= v.title %></h3>
+          <p class="dek-sm">Credit: <a href="<%= v.channel_url %>" target="_blank" rel="noopener" style="color: var(--lime);"><%= v.channel_name %></a></p>
+        </div>
+      <% }) %>
+    </div>
+    <% } else { %>
+      <p style="padding: 20px 0;">No videos added yet — check back soon.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>
