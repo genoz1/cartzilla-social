@@ -15,6 +15,13 @@
 
     <div class="article-body"><%- article.body_html %></div>
 
+    <% if (article.source_name) { %>
+    <p class="source-note">
+      Originally reported by <a href="<%= article.source_url %>" target="_blank" rel="noopener"><%= article.source_name %></a>.
+      Cartzilla summarizes industry news in our own words and links back to the source.
+    </p>
+    <% } %>
+
     <% if (article.product_url) { %>
     <div class="product-cta">
       <p style="margin: 0 0 4px; font-weight: 600;">Related product</p>
