@@ -6,8 +6,9 @@
 // the same real-world story picked up independently by two different feeds.
 require('dotenv').config();
 const Parser = require('rss-parser');
-const { supabase } = require('../lib/supabase');
+const { supabase, storeGeneratedImage } = require('../lib/supabase');
 const { isAppropriate, writeNewsArticle } = require('../lib/newsWriter');
+const { generateArticleImage } = require('../lib/imageGen');
 const { postToFacebookPage } = require('../lib/facebook');
 const { createPost: postToInstagram } = require('../lib/instagram');
 const { createPost: postToThreads } = require('../lib/threads');
@@ -139,7 +140,13 @@ async function run() {
       }
 
       const slug = await generateUniqueSlug(article.meta_title || article.title);
-      const imageUrl = extractImage(item) || '/img/placeholder.jpg';
+      let imageUrl = extractImage(item);
+      if (!imageUrl && !DRY_RUN) {
+        console.log('  No image in the source feed — generating one...');
+        const buffer = await generateArticleImage({ title: article.title, category: 'news' });
+        imageUrl = buffer ? await storeGeneratedImage(buffer, `news-${slug}.png`) : null;
+      }
+      if (!imageUrl) imageUrl = '/img/placeholder.jpg'; // final fallback if generation itself failed
       const articleUrl = `${SITE_URL}/article/${slug}`;
 
       if (DRY_RUN) {
