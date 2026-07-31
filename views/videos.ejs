@@ -12,6 +12,21 @@
       Real repair and how-to videos from creators who actually know golf carts — embedded directly
       from YouTube with full credit to whoever made them. We don't re-upload or claim these as our own.
     </p>
+
+    <form method="GET" action="/videos" style="margin-bottom: 24px; display: flex; gap: 10px; max-width: 480px;">
+      <input type="text" name="q" value="<%= searchQuery %>" placeholder="Search videos or channels (e.g. battery, EZGO, solenoid)" style="flex: 1; padding: 12px 14px; background: var(--near-black); border: 1px solid #262626; border-radius: 4px; color: var(--white); font-size: 15px;">
+      <button type="submit" class="btn">Search</button>
+      <% if (searchQuery) { %>
+        <a href="/videos" class="btn" style="background: transparent; border: 1px solid var(--lime); color: var(--lime);">Clear</a>
+      <% } %>
+    </form>
+
+    <% if (searchQuery) { %>
+      <p style="color: var(--gray-600); font-size: 14px; margin-bottom: 16px;">
+        <%= videos.length %> result<%= videos.length === 1 ? '' : 's' %> for "<%= searchQuery %>"
+      </p>
+    <% } %>
+
     <% if (videos && videos.length) { %>
     <div class="grid">
       <% videos.forEach(v => { %>
@@ -24,6 +39,8 @@
         </div>
       <% }) %>
     </div>
+    <% } else if (searchQuery) { %>
+      <p style="padding: 20px 0;">No videos match "<%= searchQuery %>" — try a different search term.</p>
     <% } else { %>
       <p style="padding: 20px 0;">No videos added yet — check back soon.</p>
     <% } %>
