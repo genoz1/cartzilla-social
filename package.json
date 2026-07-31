@@ -1,7 +1,7 @@
 {
-  "name": "cartzilla-social",
+  "name": "cartzilla-hub",
   "version": "1.0.0",
-  "description": "Automated social posting for Cartzilla Golf Cart Parts & Accessories (Shopify) - completely separate from Florida Buzz",
+  "description": "Cartzilla — golf cart news, tutorials, troubleshooting, and buying guides, with automated social posting. Product data comes from the Cartzilla Shopify store.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -17,6 +17,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
     "node-cron": "^3.0.3"
   },

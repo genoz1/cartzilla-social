@@ -1,13 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const cron = require('node-cron');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 8081;
 
-app.get('/', (req, res) => {
-  res.send('Cartzilla social automation is running.');
-});
+app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/', require('./routes/main'));
 
 // Simple health endpoint so you (or an uptime monitor) can confirm the
 // service is up and see whether live posting is armed.
@@ -20,7 +21,7 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Cartzilla social automation running on port ${PORT}`);
+  console.log(`Cartzilla running on port ${PORT}`);
 });
 
 const hasShopifyCreds = !!(process.env.CARTZILLA_SHOPIFY_STORE_DOMAIN && process.env.CARTZILLA_SHOPIFY_CLIENT_ID && process.env.CARTZILLA_SHOPIFY_CLIENT_SECRET);
