@@ -1,0 +1,76 @@
+<%- include('partials/header', { pageTitle: (article.meta_title || article.title) + ' — Cartzilla', pageDescription: article.dek, canonicalPath: '/article/' + article.slug, category: article.category, pageImage: article.image_url }) %>
+
+<main class="wrap">
+  <article class="article-page">
+    <span class="eyebrow"><%= categoryLabels[article.category] || article.category %></span>
+    <h1><%= article.title %></h1>
+    <p class="dek"><%= article.dek %></p>
+    <p class="byline">Cartzilla &middot; <%= new Date(article.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+
+    <% if (article.image_url) { %>
+    <div class="hero-image" style="margin: 20px 0;">
+      <img src="<%= article.image_url %>" alt="<%= article.title %>" loading="eager">
+    </div>
+    <% } %>
+
+    <% if (article.category === 'tutorials' || article.category === 'troubleshooting') { %>
+    <div class="safety-disclaimer">
+      <strong>⚠ Safety Note:</strong> Working on golf cart electrical and mechanical systems carries real risks, including electric shock, battery acid exposure, and injury from moving parts. This guide is for informational purposes only — if you're not fully confident performing this work safely, have a qualified technician handle it instead. Cartzilla is not responsible for injury or damage resulting from work performed based on this guide.
+    </div>
+    <% } %>
+
+    <div class="article-body"><%- article.body_html %></div>
+
+    <% if (article.source_name) { %>
+    <p class="source-note">
+      Originally reported by <a href="<%= article.source_url %>" target="_blank" rel="noopener"><%= article.source_name %></a>.
+      Cartzilla summarizes industry news in our own words and links back to the source.
+    </p>
+    <% } %>
+
+    <% if (article.product_url) { %>
+    <div class="product-cta">
+      <p style="margin: 0 0 4px; font-weight: 600;">Related product</p>
+      <p style="margin: 0 0 10px;"><%= article.product_title || 'See this on Cartzilla' %></p>
+      <a href="<%= article.product_url %>" class="btn" target="_blank" rel="noopener">View on Cartzilla &rarr;</a>
+    </div>
+    <% } %>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": <%- JSON.stringify(article.title) %>,
+      "description": <%- JSON.stringify(article.dek) %>,
+      "image": [<%- JSON.stringify(article.image_url || '') %>],
+      "datePublished": <%- JSON.stringify(new Date(article.published_at).toISOString()) %>,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Cartzilla",
+        "url": "<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') %>"
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') + '/article/' + article.slug %>"
+      }
+    }
+    </script>
+  </article>
+
+  <% if (related && related.length) { %>
+  <section class="section">
+    <div class="section-head"><span class="section-title">More <%= categoryLabels[article.category] %></span></div>
+    <div class="grid">
+      <% related.forEach(a => { %>
+        <a href="/article/<%= a.slug %>" class="card">
+          <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+          <h3><%= a.title %></h3>
+          <p class="dek-sm"><%= a.dek %></p>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+</main>
+
+<%- include('partials/footer') %>
