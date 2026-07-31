@@ -12,6 +12,8 @@
     "post-spotlight:dry": "DRY_RUN=true node scripts/post-spotlight.js",
     "post-category-howto": "node scripts/post-category-howto.js",
     "post-category-howto:dry": "DRY_RUN=true node scripts/post-category-howto.js",
+    "write-article": "node scripts/write-article.js",
+    "write-article:dry": "DRY_RUN=true node scripts/write-article.js",
     "test-mode-category": "node scripts/test-mode-category.js"
   },
   "dependencies": {

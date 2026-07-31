@@ -67,6 +67,21 @@ if (hasShopifyCreds && hasAnthropicKey && hasSupabase) {
   }
 
   console.log(`Cartzilla posts scheduled: 10am (educational) and 6pm (spotlight) Eastern daily. LIVE MODE is ${process.env.CARTZILLA_LIVE_MODE === 'true' ? 'ON — real posts will publish.' : 'OFF — runs will log/dry-run only.'}`);
+
+  // Opt-in separately: writes a real article to the content site
+  // (cartzilla_articles) and announces it on all 4 platforms — a bigger
+  // action than a social caption, so review a dry-run batch first via
+  // `npm run write-article:dry` before setting this true.
+  if (process.env.CARTZILLA_WRITE_ARTICLES_ENABLED === 'true') {
+    cron.schedule('0 9 * * *', () => {
+      console.log('Running scheduled Cartzilla article writer...');
+      require('child_process').exec('node scripts/write-article.js', (err, stdout, stderr) => {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+      });
+    }, { timezone: 'America/New_York' });
+    console.log('Cartzilla article writer also scheduled: 9am Eastern daily.');
+  }
 } else {
   console.log('Cartzilla posting NOT scheduled — set CARTZILLA_SHOPIFY_STORE_DOMAIN, CARTZILLA_SHOPIFY_CLIENT_ID, CARTZILLA_SHOPIFY_CLIENT_SECRET, ANTHROPIC_API_KEY, CARTZILLA_SUPABASE_URL, and CARTZILLA_SUPABASE_SERVICE_KEY to enable.');
 }
