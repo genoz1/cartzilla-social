@@ -25,6 +25,51 @@ const DRY_RUN = process.env.DRY_RUN === 'true';
 const MAX_ITEMS_PER_SOURCE = parseInt(process.env.MAX_ITEMS_PER_SOURCE, 10) || 3;
 const SITE_URL = process.env.SITE_URL || 'https://cartzillagolfcart.com';
 
+// RSS feeds often only provide a short, truncated teaser as their summary —
+// sometimes just the opening sentence, not the actual body content. That's
+// especially bad for roundup-style stories (a numbered list of named
+// products), where the real list only exists on the actual source page.
+// This fetches that real page and extracts its visible text, falling back
+// to the RSS snippet if the fetch fails for any reason.
+async function fetchFullSourceText(url) {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml',
+      },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) return null;
+
+    const html = await res.text();
+    let text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<nav[\s\S]*?<\/nav>/gi, ' ')
+      .replace(/<header[\s\S]*?<\/header>/gi, ' ')
+      .replace(/<footer[\s\S]*?<\/footer>/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<\/(p|div|li|h[1-6]|br)>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n\s*\n\s*\n+/g, '\n\n')
+      .trim();
+
+    if (text.length > 8000) text = text.slice(0, 8000);
+    if (text.length < 200) return null;
+    return text;
+  } catch {
+    return null;
+  }
+}
+
 function extractImage(item) {
   if (Array.isArray(item.mediaContent) && item.mediaContent[0]?.$?.url) {
     return item.mediaContent[0].$.url;
@@ -116,12 +161,20 @@ async function run() {
       }
 
       console.log(`  New item: "${item.title}" — checking content...`);
-      const summary = item.contentSnippet || item.content || item.title;
-      const ok = await isAppropriate(item.title, summary);
+      const rssSnippet = item.contentSnippet || item.content || item.title;
+      const ok = await isAppropriate(item.title, rssSnippet);
       if (!ok) {
         console.log('  [skip] Not a fit for the site — skipping.');
         await markSeen(guid);
         continue;
+      }
+
+      const fullSourceText = await fetchFullSourceText(item.link);
+      const summary = fullSourceText || rssSnippet;
+      if (fullSourceText) {
+        console.log(`  Fetched full source article (${fullSourceText.length} chars) instead of relying on the short RSS summary.`);
+      } else {
+        console.log('  Could not fetch the full source page — using the RSS feed\'s summary instead.');
       }
 
       let article;
