@@ -22,7 +22,7 @@ const parser = new Parser({
   customFields: { item: [['media:content', 'mediaContent', { keepArray: true }]] },
 });
 const DRY_RUN = process.env.DRY_RUN === 'true';
-const MAX_ITEMS_PER_SOURCE = parseInt(process.env.MAX_ITEMS_PER_SOURCE, 10) || 3;
+const MAX_ITEMS_PER_SOURCE = parseInt(process.env.MAX_ITEMS_PER_SOURCE, 10) || 8;
 const SITE_URL = process.env.SITE_URL || 'https://cartzillagolfcart.com';
 
 // RSS feeds often only provide a short, truncated teaser as their summary —
