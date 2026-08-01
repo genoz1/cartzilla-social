@@ -73,28 +73,56 @@ if (hasShopifyCreds && hasAnthropicKey && hasSupabase) {
   // action than a social caption, so review a dry-run batch first via
   // `npm run write-article:dry` before setting this true.
   if (process.env.CARTZILLA_WRITE_ARTICLES_ENABLED === 'true') {
-    cron.schedule('0 9 * * *', () => {
-      console.log('Running scheduled Cartzilla article writer...');
-      require('child_process').exec('node scripts/write-article.js', (err, stdout, stderr) => {
+    // Tutorial and Troubleshooting each run twice a day — morning batch
+    // and afternoon batch, a few minutes apart so they don't both hit the
+    // AI/Shopify APIs at the exact same second.
+    cron.schedule('0 8 * * *', () => {
+      console.log('Running scheduled Cartzilla tutorial writer (AM)...');
+      require('child_process').exec('ARTICLE_TYPE=tutorials node scripts/write-article.js', (err, stdout, stderr) => {
         if (stdout) console.log(stdout);
         if (stderr) console.error(stderr);
       });
     }, { timezone: 'America/New_York' });
-    console.log('Cartzilla article writer also scheduled: 9am Eastern daily.');
+
+    cron.schedule('15 8 * * *', () => {
+      console.log('Running scheduled Cartzilla troubleshooting writer (AM)...');
+      require('child_process').exec('ARTICLE_TYPE=troubleshooting node scripts/write-article.js', (err, stdout, stderr) => {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+      });
+    }, { timezone: 'America/New_York' });
+
+    cron.schedule('0 14 * * *', () => {
+      console.log('Running scheduled Cartzilla tutorial writer (PM)...');
+      require('child_process').exec('ARTICLE_TYPE=tutorials node scripts/write-article.js', (err, stdout, stderr) => {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+      });
+    }, { timezone: 'America/New_York' });
+
+    cron.schedule('15 14 * * *', () => {
+      console.log('Running scheduled Cartzilla troubleshooting writer (PM)...');
+      require('child_process').exec('ARTICLE_TYPE=troubleshooting node scripts/write-article.js', (err, stdout, stderr) => {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+      });
+    }, { timezone: 'America/New_York' });
+
+    console.log('Cartzilla tutorial + troubleshooting writers scheduled: 8am/8:15am and 2pm/2:15pm Eastern daily (twice each).');
   }
 
   // Opt-in separately: pulls from real golf cart industry RSS sources
   // (scripts/sources.js) and writes honest, source-credited news summaries.
   // Review a dry-run batch via `npm run write-news:dry` before enabling.
   if (process.env.CARTZILLA_WRITE_NEWS_ENABLED === 'true') {
-    cron.schedule('30 8,16 * * *', () => {
+    cron.schedule('30 7 * * *', () => {
       console.log('Running scheduled Cartzilla news writer...');
       require('child_process').exec('node scripts/write-news.js', (err, stdout, stderr) => {
         if (stdout) console.log(stdout);
         if (stderr) console.error(stderr);
       });
     }, { timezone: 'America/New_York' });
-    console.log('Cartzilla news writer also scheduled: 8:30am and 4:30pm Eastern daily.');
+    console.log('Cartzilla news writer also scheduled: 7:30am Eastern daily (once).');
   }
 
   // Opt-in separately: checks trusted YouTube channels weekly for new
