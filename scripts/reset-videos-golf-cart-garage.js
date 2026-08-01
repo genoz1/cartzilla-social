@@ -77,10 +77,28 @@ async function run() {
   let added = 0;
   let skipped = 0;
   let failed = 0;
+  let duplicates = 0;
+  const seenVideoIds = new Set();
+  const seenTitles = new Set();
 
   for (let i = 0; i < uploads.length; i++) {
     const video = uploads[i];
     console.log(`[${i + 1}/${uploads.length}] "${video.title}"`);
+
+    // Two layers of duplicate protection: the same video ID appearing
+    // twice (a known YouTube playlist-pagination quirk), and — separately
+    // — two genuinely different video IDs sharing the exact same title
+    // (e.g. an episode accidentally uploaded twice as separate videos).
+    // Either case means the reader would see the same content listed
+    // twice, so both get caught here.
+    const normalizedTitle = video.title.trim().toLowerCase();
+    if (seenVideoIds.has(video.videoId) || seenTitles.has(normalizedTitle)) {
+      console.log('  [skip] Duplicate — already processed this video (or an identically-titled one) earlier in this run.');
+      duplicates++;
+      continue;
+    }
+    seenVideoIds.add(video.videoId);
+    seenTitles.add(normalizedTitle);
 
     const relevant = await isRelevantHowTo(video.title, video.description);
     if (!relevant) {
@@ -115,7 +133,7 @@ async function run() {
     await sleep(DELAY_BETWEEN_CHECKS_MS);
   }
 
-  console.log(`\n=== Import complete: ${added} added, ${skipped} skipped (not how-to content), ${failed} failed (out of ${uploads.length} total) ===`);
+  console.log(`\n=== Import complete: ${added} added, ${skipped} skipped (not how-to content), ${duplicates} duplicates skipped, ${failed} failed (out of ${uploads.length} total) ===`);
 }
 
 run().catch((err) => {
