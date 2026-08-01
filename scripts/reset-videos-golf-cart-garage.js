@@ -102,6 +102,7 @@ async function run() {
       title: video.title,
       channel_name: GOLF_CART_GARAGE.name,
       channel_url: GOLF_CART_GARAGE.url,
+      published_at: video.publishedAt,
     });
     if (error) {
       console.error(`  [error] Could not save: ${error.message}`);
