@@ -119,7 +119,7 @@ router.get('/videos', async (req, res) => {
   const q = (req.query.q || '').trim();
   let videos = [];
   if (supabase) {
-    let query = supabase.from('cartzilla_videos').select('*').order('added_at', { ascending: false });
+    let query = supabase.from('cartzilla_videos').select('*').order('published_at', { ascending: false, nullsFirst: false });
     if (q) {
       // Matches against title OR channel name, case-insensitive
       query = query.or(`title.ilike.%${q}%,channel_name.ilike.%${q}%`);
