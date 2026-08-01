@@ -22,6 +22,8 @@
     "write-buying-guide:dry": "DRY_RUN=true ARTICLE_TYPE=buying-guides node scripts/write-article.js",
     "write-review": "ARTICLE_TYPE=reviews node scripts/write-article.js",
     "write-review:dry": "DRY_RUN=true ARTICLE_TYPE=reviews node scripts/write-article.js",
+    "seed-articles": "node scripts/seed-articles.js",
+    "seed-articles:dry": "DRY_RUN=true node scripts/seed-articles.js",
     "write-news": "node scripts/write-news.js",
     "write-news:dry": "DRY_RUN=true node scripts/write-news.js",
     "check-new-videos": "node scripts/check-new-videos.js",
