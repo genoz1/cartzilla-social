@@ -23,8 +23,20 @@ const SITE_URL = process.env.SITE_URL || 'https://cartzillagolfcart.com';
 // product-grounded, highest search-intent types) come up more often.
 // "News" is deliberately not in this list — see lib/articleWriter.js.
 const ARTICLE_TYPE_WEIGHTS = { tutorials: 35, troubleshooting: 30, 'buying-guides': 20, reviews: 15 };
+const VALID_TYPES = Object.keys(ARTICLE_TYPE_WEIGHTS);
 
+// Set ARTICLE_TYPE (e.g. ARTICLE_TYPE=tutorials) to force a specific type
+// instead of the normal random weighted pick — used for the dedicated
+// tutorial/troubleshooting commands and their own schedule.
 function pickArticleType() {
+  const forced = process.env.ARTICLE_TYPE;
+  if (forced) {
+    if (!VALID_TYPES.includes(forced)) {
+      throw new Error(`ARTICLE_TYPE must be one of: ${VALID_TYPES.join(', ')} (got "${forced}")`);
+    }
+    return forced;
+  }
+
   const entries = Object.entries(ARTICLE_TYPE_WEIGHTS);
   const total = entries.reduce((sum, [, w]) => sum + w, 0);
   let roll = Math.random() * total;
