@@ -1,0 +1,41 @@
+<%- include('partials/header', { pageTitle: 'Search — Cartzilla', canonicalPath: '/search' }) %>
+
+<section class="category-hero">
+  <div class="wrap">
+    <span class="section-title">🔍 Search Results</span>
+  </div>
+</section>
+
+<main class="wrap">
+  <section class="section">
+    <form method="GET" action="/search" style="margin-bottom: 24px; display: flex; gap: 10px; max-width: 480px;">
+      <input type="text" name="q" value="<%= searchQuery %>" placeholder="Search articles..." style="flex: 1; padding: 12px 14px; background: var(--near-black); border: 1px solid #262626; border-radius: 4px; color: var(--white); font-size: 15px;">
+      <button type="submit" class="btn">Search</button>
+    </form>
+
+    <% if (searchQuery) { %>
+      <p style="color: var(--gray-600); font-size: 14px; margin-bottom: 16px;">
+        <%= results.length %> result<%= results.length === 1 ? '' : 's' %> for "<%= searchQuery %>"
+      </p>
+    <% } %>
+
+    <% if (results && results.length) { %>
+    <div class="grid">
+      <% results.forEach(a => { %>
+        <a href="/article/<%= a.slug %>" class="card">
+          <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+          <span class="eyebrow" style="margin: 12px 14px 0;"><%= categoryLabels[a.category] || a.category %></span>
+          <h3><%= a.title %></h3>
+          <p class="dek-sm"><%= a.dek %></p>
+        </a>
+      <% }) %>
+    </div>
+    <% } else if (searchQuery) { %>
+      <p style="padding: 20px 0;">No articles match "<%= searchQuery %>" — try a different search term.</p>
+    <% } else { %>
+      <p style="padding: 20px 0;">Enter a search term above to find articles.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Cartzilla — Golf Cart News, Tutorials & Guides' %></title>
+  <meta name="description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Golf cart news, tutorials, troubleshooting guides, and buying advice.' %>">
+  <link rel="canonical" href="<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') + (typeof canonicalPath !== 'undefined' && canonicalPath ? canonicalPath : '') %>">
+
+  <!-- Open Graph — controls how links look when shared on Facebook, Threads, etc. -->
+  <meta property="og:type" content="<%= typeof canonicalPath !== 'undefined' && canonicalPath && canonicalPath.startsWith('/article/') ? 'article' : 'website' %>">
+  <meta property="og:site_name" content="Cartzilla">
+  <meta property="og:title" content="<%= typeof pageTitle !== 'undefined' ? pageTitle : 'Cartzilla — Golf Cart News, Tutorials & Guides' %>">
+  <meta property="og:description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Golf cart news, tutorials, troubleshooting guides, and buying advice.' %>">
+  <meta property="og:url" content="<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') + (typeof canonicalPath !== 'undefined' && canonicalPath ? canonicalPath : '') %>">
+  <meta property="og:image" content="<%= typeof pageImage !== 'undefined' && pageImage ? pageImage : (process.env.SITE_URL || 'https://cartzillagolfcart.com') + '/img/logo.png' %>">
+
+  <!-- Twitter/X Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= typeof pageTitle !== 'undefined' ? pageTitle : 'Cartzilla — Golf Cart News, Tutorials & Guides' %>">
+  <meta name="twitter:description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : 'Golf cart news, tutorials, troubleshooting guides, and buying advice.' %>">
+  <meta name="twitter:image" content="<%= typeof pageImage !== 'undefined' && pageImage ? pageImage : (process.env.SITE_URL || 'https://cartzillagolfcart.com') + '/img/logo.png' %>">
+
+  <link rel="icon" type="image/png" href="/img/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <% if (process.env.GA4_MEASUREMENT_ID) { %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= process.env.GA4_MEASUREMENT_ID %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<%= process.env.GA4_MEASUREMENT_ID %>');
+  </script>
+  <% } %>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Cartzilla",
+    "url": "<%= (process.env.SITE_URL || 'https://cartzillagolfcart.com') %>"
+  }
+  </script>
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a href="/" class="logo"><img src="/img/logo.png" alt="Cartzilla" class="logo-img"></a>
+      <div class="nav-links">
+        <a href="/category/news" class="<%= typeof category !== 'undefined' && category === 'news' ? 'active' : '' %>">News</a>
+        <a href="/category/tutorials" class="<%= typeof category !== 'undefined' && category === 'tutorials' ? 'active' : '' %>">Tutorials</a>
+        <a href="/category/troubleshooting" class="<%= typeof category !== 'undefined' && category === 'troubleshooting' ? 'active' : '' %>">Troubleshooting</a>
+        <a href="/category/buying-guides" class="<%= typeof category !== 'undefined' && category === 'buying-guides' ? 'active' : '' %>">Buying Guides</a>
+        <a href="/category/reviews" class="<%= typeof category !== 'undefined' && category === 'reviews' ? 'active' : '' %>">Reviews</a>
+        <a href="/videos" class="<%= typeof category !== 'undefined' && category === 'videos' ? 'active' : '' %>">How-To Videos</a>
+        <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop</a>
+      </div>
+      <form action="/search" method="GET" class="nav-search">
+        <input type="text" name="q" placeholder="Search Cartzilla...">
+        <button type="submit" aria-label="Search">🔍</button>
+      </form>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="/category/news">News</a>
+      <a href="/category/tutorials">Tutorials</a>
+      <a href="/category/troubleshooting">Troubleshooting</a>
+      <a href="/category/buying-guides">Buying Guides</a>
+      <a href="/category/reviews">Reviews</a>
+      <a href="/videos">How-To Videos</a>
+      <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop</a>
+      <form action="/search" method="GET" style="padding: 14px 20px; display: flex; gap: 8px;">
+        <input type="text" name="q" placeholder="Search Cartzilla..." style="flex: 1; padding: 10px 12px; background: var(--black); border: 1px solid #333; border-radius: 4px; color: var(--white);">
+        <button type="submit" class="btn" style="padding: 10px 16px;">🔍</button>
+      </form>
+    </div>
+  </nav>
+
+  <script>
+    (function () {
+      var toggle = document.getElementById('menuToggle');
+      var menu = document.getElementById('mobileMenu');
+      if (!toggle || !menu) return;
+      toggle.addEventListener('click', function () {
+        var isOpen = menu.classList.toggle('open');
+        toggle.classList.toggle('open', isOpen);
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+      });
+      menu.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+          menu.classList.remove('open');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-label', 'Open menu');
+        });
+      });
+    })();
+  </script>

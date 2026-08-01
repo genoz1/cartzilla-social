@@ -1,42 +1,93 @@
 <%- include('partials/header', { pageTitle: 'Cartzilla — Golf Cart News, Tutorials & Buying Guides', pageDescription: 'Golf cart news, tutorials, troubleshooting guides, and buying advice.', canonicalPath: '/' }) %>
 
-<section class="hero">
-  <div class="wrap">
-    <h1>REAL FIXES. REAL GUIDES.<br><span class="lime">NO FLUFF.</span></h1>
-    <p>Golf cart news, tutorials, troubleshooting, and buying advice — written by people who actually work on these things, not generic SEO filler.</p>
-    <a href="/category/troubleshooting" class="btn">Start Troubleshooting &rarr;</a>
+<section class="hero-banner">
+  <div class="wrap hero-banner-grid">
+    <div class="hero-banner-copy">
+      <h1>THE ULTIMATE<br><span class="lime">GOLF CART RESOURCE</span></h1>
+      <p>News, guides, tutorials, and expert reviews to help you buy, build, and maintain the perfect golf cart.</p>
+      <div class="hero-banner-ctas">
+        <a href="/category/tutorials" class="btn">Browse Guides &rarr;</a>
+        <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>" class="btn btn-outline">Shop Parts</a>
+      </div>
+    </div>
+    <% if (process.env.CARTZILLA_HERO_IMAGE_URL) { %>
+    <div class="hero-banner-image">
+      <img src="<%= process.env.CARTZILLA_HERO_IMAGE_URL %>" alt="Golf cart">
+    </div>
+    <% } %>
   </div>
 </section>
 
-<div class="value-strip">
-  <div class="wrap">
-    <div class="value-item"><strong>Owner-Written</strong><span>Not generic filler</span></div>
-    <div class="value-item"><strong>Always Free</strong><span>No paywalls, ever</span></div>
-    <div class="value-item"><strong>EZGO · Club Car · Yamaha</strong><span>All major brands covered</span></div>
-    <div class="value-item"><strong>Real Answers</strong><span>Fixes that actually work</span></div>
-  </div>
-</div>
-
 <main class="wrap">
-  <section class="section">
-    <div class="section-head">
-      <span class="section-title">Latest</span>
+  <div class="home-layout">
+    <div class="home-main">
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Latest News &amp; Updates</span>
+          <a href="/category/news">View All News &rarr;</a>
+        </div>
+        <% if (newsArticles && newsArticles.length) { %>
+        <div class="grid grid-4">
+          <% newsArticles.forEach(a => { %>
+            <a href="/article/<%= a.slug %>" class="card">
+              <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+              <span class="eyebrow" style="margin: 12px 14px 0;"><%= categoryLabels[a.category] || a.category %></span>
+              <h3><%= a.title %></h3>
+              <p class="dek-sm"><%= a.dek %></p>
+              <p class="card-meta"><%= new Date(a.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %> &middot; <%= estimateReadTime(a.body_html) %> min read</p>
+            </a>
+          <% }) %>
+        </div>
+        <% } else { %>
+          <p>No news published yet — check back soon.</p>
+        <% } %>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Popular Guides</span>
+          <a href="/category/tutorials">View All Guides &rarr;</a>
+        </div>
+        <% if (guideArticles && guideArticles.length) { %>
+        <div class="grid grid-6">
+          <% guideArticles.forEach(a => { %>
+            <a href="/article/<%= a.slug %>" class="card card-compact">
+              <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+              <h3><%= a.title %></h3>
+              <span class="eyebrow"><%= categoryLabels[a.category] || a.category %></span>
+            </a>
+          <% }) %>
+        </div>
+        <% } else { %>
+          <p>No guides published yet — check back soon.</p>
+        <% } %>
+      </section>
     </div>
-    <% if (articles && articles.length) { %>
-    <div class="grid">
-      <% articles.forEach(a => { %>
-        <a href="/article/<%= a.slug %>" class="card">
-          <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
-          <span class="eyebrow" style="margin: 12px 14px 0;"><%= categoryLabels[a.category] || a.category %></span>
-          <h3><%= a.title %></h3>
-          <p class="dek-sm"><%= a.dek %></p>
-        </a>
-      <% }) %>
-    </div>
-    <% } else { %>
-      <p>No articles published yet — check back soon.</p>
-    <% } %>
-  </section>
+
+    <aside class="home-sidebar">
+      <p class="sidebar-title">Popular Topics</p>
+      <a href="/category/troubleshooting" class="sidebar-topic">
+        <span class="sidebar-topic-name">Troubleshooting</span>
+        <span class="sidebar-topic-desc">Fix common problems</span>
+      </a>
+      <a href="/category/buying-guides" class="sidebar-topic">
+        <span class="sidebar-topic-name">Buying Guides</span>
+        <span class="sidebar-topic-desc">Make the right choice</span>
+      </a>
+      <a href="/category/tutorials" class="sidebar-topic">
+        <span class="sidebar-topic-name">Tutorials</span>
+        <span class="sidebar-topic-desc">Step-by-step guides</span>
+      </a>
+      <a href="/category/reviews" class="sidebar-topic">
+        <span class="sidebar-topic-name">Reviews</span>
+        <span class="sidebar-topic-desc">Expert tested</span>
+      </a>
+      <a href="/videos" class="sidebar-topic">
+        <span class="sidebar-topic-name">How-To Videos</span>
+        <span class="sidebar-topic-desc">Watch and learn</span>
+      </a>
+    </aside>
+  </div>
 </main>
 
 <%- include('partials/footer') %>
