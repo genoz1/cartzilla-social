@@ -33,17 +33,41 @@ ${urls.join('\n')}
 </urlset>`);
 });
 
+// Rough reading time from body_html word count — no stored field for this,
+// so it's computed on the fly from the actual content each time.
+function estimateReadTime(bodyHtml) {
+  const text = (bodyHtml || '').replace(/<[^>]+>/g, ' ');
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
 router.get('/', async (req, res) => {
-  let articles = [];
+  let newsArticles = [];
+  let guideArticles = [];
   if (supabase) {
+    const [newsResult, guidesResult] = await Promise.all([
+      supabase.from('cartzilla_articles').select('*').eq('category', 'news').order('published_at', { ascending: false }).limit(4),
+      supabase.from('cartzilla_articles').select('*').neq('category', 'news').order('published_at', { ascending: false }).limit(6),
+    ]);
+    newsArticles = newsResult.data || [];
+    guideArticles = guidesResult.data || [];
+  }
+  res.render('home', { newsArticles, guideArticles, categoryLabels: CATEGORY_LABELS, estimateReadTime });
+});
+
+router.get('/search', async (req, res) => {
+  const q = (req.query.q || '').trim();
+  let results = [];
+  if (supabase && q) {
     const { data } = await supabase
       .from('cartzilla_articles')
       .select('*')
+      .or(`title.ilike.%${q}%,dek.ilike.%${q}%,body_html.ilike.%${q}%`)
       .order('published_at', { ascending: false })
-      .limit(24);
-    articles = data || [];
+      .limit(30);
+    results = data || [];
   }
-  res.render('home', { articles, categoryLabels: CATEGORY_LABELS });
+  res.render('search', { results, searchQuery: q, categoryLabels: CATEGORY_LABELS, estimateReadTime });
 });
 
 router.get('/category/:category', async (req, res) => {
