@@ -190,14 +190,18 @@ async function main() {
   });
 
   const logMeta = { shopifyProductId: collection.id, productTitle: written.title, productUrl: articleUrl, postType: 'blog_article_announcement' };
-  const socialResults = await announceOnSocial({
-    articleTitle: written.title,
-    articleUrl,
-    imageUrl,
-    dek: written.dek,
-    logMeta,
-  });
-  console.log('Social announcement results:', JSON.stringify(socialResults, null, 2));
+  if (process.env.SKIP_SOCIAL === 'true') {
+    console.log('SKIP_SOCIAL is set — article saved to the site but not announced on social.');
+  } else {
+    const socialResults = await announceOnSocial({
+      articleTitle: written.title,
+      articleUrl,
+      imageUrl,
+      dek: written.dek,
+      logMeta,
+    });
+    console.log('Social announcement results:', JSON.stringify(socialResults, null, 2));
+  }
 
   console.log('=== Done ===');
 }
