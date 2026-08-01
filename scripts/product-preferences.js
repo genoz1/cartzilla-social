@@ -31,4 +31,26 @@ function isPriority(product) {
   return matchesAnyKeyword(product, PRIORITY_KEYWORDS);
 }
 
-module.exports = { EXCLUDED_KEYWORDS, PRIORITY_KEYWORDS, isExcluded, isPriority };
+// Collections that exist for internal/administrative purposes — sales
+// channel feeds (eBay, Walmart Marketplace), brand-filter collections, or
+// misc grab-bags — rather than as genuine reader-facing product categories.
+// These should never be picked as the topic/banner for an article or a
+// category social post, even though they're perfectly normal to have in
+// Shopify for their actual purpose. Matched by exact title,
+// case-insensitive. Add more any time you spot one slipping through.
+const EXCLUDED_COLLECTIONS = [
+  'eBay Active',
+  'walmart products',
+  'Featured Products',
+  'Club Car',
+  'EZGO',
+  'Yamaha',
+  'Roykaw',
+];
+
+function isExcludedCollection(collection) {
+  const title = (collection.title || '').toLowerCase();
+  return EXCLUDED_COLLECTIONS.some((name) => name.toLowerCase() === title);
+}
+
+module.exports = { EXCLUDED_KEYWORDS, PRIORITY_KEYWORDS, EXCLUDED_COLLECTIONS, isExcluded, isPriority, isExcludedCollection };
