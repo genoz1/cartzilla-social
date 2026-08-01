@@ -31,6 +31,7 @@
     "reset-videos-golf-cart-garage": "node scripts/reset-videos-golf-cart-garage.js",
     "reset-videos-golf-cart-garage:dry": "DRY_RUN=true node scripts/reset-videos-golf-cart-garage.js",
     "regenerate-placeholder-images": "node scripts/regenerate-placeholder-images.js",
+    "generate-hero-image": "node scripts/generate-hero-image.js",
     "test-mode-category": "node scripts/test-mode-category.js"
   },
   "dependencies": {
