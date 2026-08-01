@@ -218,6 +218,23 @@ body {
 .product-cta .btn {
   margin-top: 10px;
 }
+.category-banner {
+  margin: 28px 0;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, var(--near-black) 0%, #16210a 100%);
+  border: 2px solid var(--lime);
+  border-radius: 8px;
+  text-align: center;
+}
+.category-banner-label {
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: uppercase;
+  color: var(--lime);
+  margin: 0 0 6px;
+}
+.category-banner p { color: var(--gray-300); margin: 0 0 14px; }
+.category-banner .btn { margin-top: 4px; }
 
 .btn {
   display: inline-block;
