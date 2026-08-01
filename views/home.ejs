@@ -10,61 +10,14 @@
         <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>" class="btn btn-outline">Shop Parts</a>
       </div>
     </div>
+
     <% if (process.env.CARTZILLA_HERO_IMAGE_URL) { %>
     <div class="hero-banner-image">
       <img src="<%= process.env.CARTZILLA_HERO_IMAGE_URL %>" alt="Golf cart">
     </div>
     <% } %>
-  </div>
-</section>
 
-<main class="wrap">
-  <div class="home-layout">
-    <div class="home-main">
-      <section class="section">
-        <div class="section-head">
-          <span class="section-title">Latest News &amp; Updates</span>
-          <a href="/category/news">View All News &rarr;</a>
-        </div>
-        <% if (newsArticles && newsArticles.length) { %>
-        <div class="grid grid-4">
-          <% newsArticles.forEach(a => { %>
-            <a href="/article/<%= a.slug %>" class="card">
-              <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
-              <span class="eyebrow" style="margin: 12px 14px 0;"><%= categoryLabels[a.category] || a.category %></span>
-              <h3><%= a.title %></h3>
-              <p class="dek-sm"><%= a.dek %></p>
-              <p class="card-meta"><%= new Date(a.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %> &middot; <%= estimateReadTime(a.body_html) %> min read</p>
-            </a>
-          <% }) %>
-        </div>
-        <% } else { %>
-          <p>No news published yet — check back soon.</p>
-        <% } %>
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <span class="section-title">Popular Guides</span>
-          <a href="/category/tutorials">View All Guides &rarr;</a>
-        </div>
-        <% if (guideArticles && guideArticles.length) { %>
-        <div class="grid grid-6">
-          <% guideArticles.forEach(a => { %>
-            <a href="/article/<%= a.slug %>" class="card card-compact">
-              <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
-              <h3><%= a.title %></h3>
-              <span class="eyebrow"><%= categoryLabels[a.category] || a.category %></span>
-            </a>
-          <% }) %>
-        </div>
-        <% } else { %>
-          <p>No guides published yet — check back soon.</p>
-        <% } %>
-      </section>
-    </div>
-
-    <aside class="home-sidebar">
+    <aside class="hero-sidebar">
       <p class="sidebar-title">Popular Topics</p>
       <a href="/category/troubleshooting" class="sidebar-topic">
         <span class="sidebar-topic-name">Troubleshooting</span>
@@ -88,6 +41,50 @@
       </a>
     </aside>
   </div>
+</section>
+
+<main class="wrap">
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Latest News &amp; Updates</span>
+      <a href="/category/news">View All News &rarr;</a>
+    </div>
+    <% if (newsArticles && newsArticles.length) { %>
+    <div class="grid grid-4">
+      <% newsArticles.forEach(a => { %>
+        <a href="/article/<%= a.slug %>" class="card">
+          <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+          <span class="eyebrow" style="margin: 12px 14px 0;"><%= categoryLabels[a.category] || a.category %></span>
+          <h3><%= a.title %></h3>
+          <p class="dek-sm"><%= a.dek %></p>
+          <p class="card-meta"><%= new Date(a.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %> &middot; <%= estimateReadTime(a.body_html) %> min read</p>
+        </a>
+      <% }) %>
+    </div>
+    <% } else { %>
+      <p>No news published yet — check back soon.</p>
+    <% } %>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">Popular Guides</span>
+      <a href="/category/tutorials">View All Guides &rarr;</a>
+    </div>
+    <% if (guideArticles && guideArticles.length) { %>
+    <div class="grid grid-6">
+      <% guideArticles.forEach(a => { %>
+        <a href="/article/<%= a.slug %>" class="card card-compact">
+          <div class="card-image"><img src="<%= a.image_url || '/img/placeholder.jpg' %>" alt="<%= a.title %>" loading="lazy"></div>
+          <h3><%= a.title %></h3>
+          <span class="eyebrow"><%= categoryLabels[a.category] || a.category %></span>
+        </a>
+      <% }) %>
+    </div>
+    <% } else { %>
+      <p>No guides published yet — check back soon.</p>
+    <% } %>
+  </section>
 </main>
 
 <%- include('partials/footer') %>
