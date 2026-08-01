@@ -96,6 +96,20 @@ if (hasShopifyCreds && hasAnthropicKey && hasSupabase) {
     }, { timezone: 'America/New_York' });
     console.log('Cartzilla news writer also scheduled: 8:30am and 4:30pm Eastern daily.');
   }
+
+  // Opt-in separately: checks trusted YouTube channels weekly for new
+  // how-to videos and adds them automatically. Needs YOUTUBE_API_KEY set.
+  // Review with `npm run check-new-videos:dry` before enabling.
+  if (process.env.CARTZILLA_CHECK_VIDEOS_ENABLED === 'true') {
+    cron.schedule('0 7 * * 1', () => {
+      console.log('Running scheduled Cartzilla video checker...');
+      require('child_process').exec('node scripts/check-new-videos.js', (err, stdout, stderr) => {
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+      });
+    }, { timezone: 'America/New_York' });
+    console.log('Cartzilla video checker also scheduled: Mondays 7am Eastern.');
+  }
 } else {
   console.log('Cartzilla posting NOT scheduled — set CARTZILLA_SHOPIFY_STORE_DOMAIN, CARTZILLA_SHOPIFY_CLIENT_ID, CARTZILLA_SHOPIFY_CLIENT_SECRET, ANTHROPIC_API_KEY, CARTZILLA_SUPABASE_URL, and CARTZILLA_SUPABASE_SERVICE_KEY to enable.');
 }
