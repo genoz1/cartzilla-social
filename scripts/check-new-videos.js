@@ -70,6 +70,7 @@ async function run() {
         title: video.title,
         channel_name: channel.name,
         channel_url: channel.url,
+        published_at: video.publishedAt,
       });
       if (error) {
         console.error(`  [error] Could not save: ${error.message}`);
