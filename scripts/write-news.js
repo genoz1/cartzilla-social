@@ -129,7 +129,7 @@ async function isDuplicateOfRecent(title) {
 async function announceOnSocial({ articleTitle, articleUrl, imageUrl, dek, logMeta }) {
   const facebookMessage = `${articleTitle}\n\n${dek}\n\n${articleUrl}`;
   const results = {};
-  results.facebook = await postToFacebookPage({ message: facebookMessage, link: articleUrl, dryRun: DRY_RUN, meta: logMeta });
+  results.facebook = await postToFacebookPage({ message: facebookMessage, link: articleUrl, imageUrl, dryRun: DRY_RUN, meta: logMeta });
   if (imageUrl) {
     results.instagram = await postToInstagram({ imageUrl, caption: `${articleTitle}\n\n${dek}\n\nFull story — link in bio.`, dryRun: DRY_RUN, meta: logMeta });
     results.threads = await postToThreads({ text: `${articleTitle}\n\n${articleUrl}`, imageUrl, dryRun: DRY_RUN, meta: logMeta });

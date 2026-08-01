@@ -1,14 +1,18 @@
-// Writes a real article grounded in an actual Shopify product, publishes it
-// into the cartzilla_articles table (the new content site — NOT Shopify's
-// own blog), and announces it across all four social platforms. Rotation
-// for these articles is tracked independently from the existing social-only
-// post types (educational/spotlight/category_howto) via the postTypes
+// Writes a general-topic article (grounded in a product CATEGORY for
+// inspiration, not one specific product), publishes it into the
+// cartzilla_articles table, and announces it across all four social
+// platforms. Uses an AI-generated image (bright, on-brand, never
+// dark/black-background — see lib/imageGen.js) rather than a real product
+// photo, and embeds a "shop this category" banner roughly mid-article
+// rather than a plain inline text link. Rotation for these articles is
+// tracked independently from the social-only post types via the postTypes
 // filter in lib/rotation.js, using its own 'blog_article' post type.
 require('dotenv').config();
-const { supabase } = require('../lib/supabase');
-const { fetchActiveProducts } = require('../lib/shopify');
-const { pickNextProducts } = require('../lib/rotation');
-const { generateArticle } = require('../lib/articleWriter');
+const { supabase, storeGeneratedImage } = require('../lib/supabase');
+const { fetchEligibleCollections } = require('../lib/shopify');
+const { pickNextCollection } = require('../lib/rotation');
+const { generateArticle, insertMidArticleBanner } = require('../lib/articleWriter');
+const { generateArticleImage } = require('../lib/imageGen');
 const { postToFacebookPage } = require('../lib/facebook');
 const { createPost: postToInstagram } = require('../lib/instagram');
 const { createPost: postToThreads } = require('../lib/threads');
@@ -69,13 +73,23 @@ async function generateUniqueSlug(baseTitle) {
   }
 }
 
+function buildCategoryBanner(collection) {
+  return `
+<div class="category-banner">
+  <p class="category-banner-label">🛒 Shop ${collection.title}</p>
+  <p>See current options in this category on Cartzilla.</p>
+  <a href="${collection.url}" class="btn" target="_blank" rel="noopener">Browse ${collection.title} &rarr;</a>
+</div>
+`;
+}
+
 async function announceOnSocial({ articleTitle, articleUrl, imageUrl, dek, logMeta }) {
   const facebookMessage = `New on the blog: ${articleTitle}\n\n${dek}\n\n${articleUrl}`;
   const instagramCaption = `${articleTitle}\n\n${dek}\n\nFull guide — link in bio.`;
   const threadsText = `${articleTitle}\n\n${articleUrl}`;
 
   const results = {};
-  results.facebook = await postToFacebookPage({ message: facebookMessage, link: articleUrl, dryRun: DRY_RUN, meta: logMeta });
+  results.facebook = await postToFacebookPage({ message: facebookMessage, link: articleUrl, imageUrl, dryRun: DRY_RUN, meta: logMeta });
   results.instagram = await postToInstagram({ imageUrl, caption: instagramCaption, dryRun: DRY_RUN, meta: logMeta });
   results.threads = await postToThreads({ text: threadsText, imageUrl, dryRun: DRY_RUN, meta: logMeta });
   results.pinterest = await createPin({
@@ -93,38 +107,50 @@ async function main() {
   console.log(`\n=== Cartzilla article writer — ${new Date().toISOString()} ===`);
   console.log(`Live mode: ${isLiveModeEnabled() ? 'ON' : 'off (dry-run only)'}`);
 
-  const products = await fetchActiveProducts();
-  console.log(`Found ${products.length} eligible product(s).`);
-  if (products.length === 0) {
-    console.log('No eligible products — exiting.');
+  const collections = await fetchEligibleCollections();
+  console.log(`Found ${collections.length} eligible collection(s).`);
+  if (collections.length === 0) {
+    console.log('No eligible collections — exiting.');
     return;
   }
 
-  const [product] = await pickNextProducts(products, 1, { postTypes: ['blog_article'] });
-  if (!product) {
-    console.log('No eligible product available for a new article today — exiting.');
+  const collection = await pickNextCollection(collections, { postTypes: ['blog_article'] });
+  if (!collection) {
+    console.log('No eligible collection available for a new article today — exiting.');
     return;
   }
 
   const articleType = pickArticleType();
-  console.log(`Selected product: "${product.title}" — article type: ${articleType}`);
+  console.log(`Selected category: "${collection.title}" — article type: ${articleType}`);
 
   let written;
   try {
-    written = await generateArticle(product, articleType);
+    written = await generateArticle(collection, articleType);
   } catch (err) {
     console.error(`[error] Writing failed: ${err.message}`);
     process.exit(1);
   }
 
+  const bannerHtml = buildCategoryBanner(collection);
+  const bodyWithBanner = insertMidArticleBanner(written.body_html, bannerHtml);
+
   const slug = await generateUniqueSlug(written.meta_title || written.title);
   const articleUrl = `${SITE_URL}/article/${slug}`;
+
+  console.log('Generating a real, topic-specific image (bright, on-brand — not a product photo)...');
+  const imageBuffer = await generateArticleImage({ title: written.title, category: articleType });
+  let imageUrl = null;
+  if (imageBuffer && !DRY_RUN) {
+    imageUrl = await storeGeneratedImage(imageBuffer, `article-${slug}.png`);
+  }
+  if (!imageUrl) imageUrl = collection.imageUrl; // fall back to a real category photo if generation failed
 
   if (DRY_RUN) {
     console.log(`[dry-run] Title: ${written.title}`);
     console.log(`[dry-run] Category: ${articleType}`);
-    console.log(`[dry-run] Would link to product: ${product.title} (${product.url})`);
-    console.log(`[dry-run] Body:\n${written.body_html}`);
+    console.log(`[dry-run] Would link banner to: ${collection.title} (${collection.url})`);
+    console.log(`[dry-run] Would use image: ${imageBuffer ? '(newly generated)' : `(fallback: ${collection.imageUrl})`}`);
+    console.log(`[dry-run] Body with banner:\n${bodyWithBanner}`);
     console.log('[dry-run] Would announce on Facebook, Instagram, Threads, and Pinterest.');
     return;
   }
@@ -139,11 +165,11 @@ async function main() {
     title: written.title,
     meta_title: written.meta_title,
     dek: written.dek,
-    body_html: written.body_html,
+    body_html: bodyWithBanner,
     category: articleType,
-    image_url: product.imageUrl,
-    product_url: product.url,
-    product_title: product.title,
+    image_url: imageUrl,
+    product_url: collection.url,
+    product_title: collection.title,
   });
 
   if (error) {
@@ -153,21 +179,21 @@ async function main() {
   console.log(`Published: ${articleUrl}`);
 
   await logPost({
-    shopifyProductId: product.id,
+    shopifyProductId: collection.id,
     productTitle: written.title,
     productUrl: articleUrl,
     postType: 'blog_article',
     platform: 'cartzilla_site',
     caption: written.title,
-    imageUrl: product.imageUrl,
+    imageUrl,
     status: 'success',
   });
 
-  const logMeta = { shopifyProductId: product.id, productTitle: written.title, productUrl: articleUrl, postType: 'blog_article_announcement' };
+  const logMeta = { shopifyProductId: collection.id, productTitle: written.title, productUrl: articleUrl, postType: 'blog_article_announcement' };
   const socialResults = await announceOnSocial({
     articleTitle: written.title,
     articleUrl,
-    imageUrl: product.imageUrl,
+    imageUrl,
     dek: written.dek,
     logMeta,
   });
