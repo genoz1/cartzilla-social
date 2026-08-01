@@ -269,7 +269,7 @@ footer .wrap {
 }
 
 /* Hero */
-/* New hero banner (with photo) */
+/* New hero banner (with photo + popular topics sidebar, 3 columns) */
 .hero-banner {
   background: var(--near-black);
   border-bottom: 2px solid var(--lime);
@@ -277,13 +277,13 @@ footer .wrap {
 }
 .hero-banner-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 40px;
+  grid-template-columns: 1fr 0.9fr 280px;
+  gap: 32px;
   align-items: center;
 }
 .hero-banner-copy h1 {
   font-family: var(--font-display);
-  font-size: 42px;
+  font-size: 38px;
   text-transform: uppercase;
   line-height: 1.05;
   margin: 0 0 14px;
@@ -292,7 +292,7 @@ footer .wrap {
 .hero-banner-copy p {
   font-size: 16px;
   color: var(--gray-300);
-  max-width: 460px;
+  max-width: 420px;
   margin: 0 0 22px;
 }
 .hero-banner-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -308,20 +308,13 @@ footer .wrap {
   display: block;
 }
 
-/* Home layout: main content + sidebar */
-.home-layout {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 40px;
-  align-items: start;
-}
-.home-sidebar {
-  background: var(--near-black);
+/* Popular Topics sidebar — lives inside the hero banner itself */
+.hero-sidebar {
+  background: var(--black);
   border: 1px solid #262626;
   border-radius: 8px;
   padding: 20px;
-  position: sticky;
-  top: 20px;
+  align-self: stretch;
 }
 .sidebar-title {
   font-family: var(--font-display);
@@ -486,8 +479,7 @@ footer .wrap {
 @media (max-width: 900px) {
   .hero-banner-grid { grid-template-columns: 1fr; }
   .hero-banner-image { order: -1; }
-  .home-layout { grid-template-columns: 1fr; }
-  .home-sidebar { position: static; }
+  .hero-sidebar { order: 2; }
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-6 { grid-template-columns: repeat(3, 1fr); }
 }
