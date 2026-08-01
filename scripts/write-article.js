@@ -114,13 +114,19 @@ async function main() {
     return;
   }
 
-  const collection = await pickNextCollection(collections, { postTypes: ['blog_article'] });
+  const articleType = pickArticleType();
+
+  // Type-specific rotation pool (e.g. 'blog_article_tutorials' vs
+  // 'blog_article_troubleshooting') rather than one shared 'blog_article'
+  // bucket — otherwise a collection used for a tutorial today would also
+  // be blocked from getting a buying guide today, needlessly shrinking the
+  // pool when you have several types running the same day.
+  const collection = await pickNextCollection(collections, { postTypes: [`blog_article_${articleType}`] });
   if (!collection) {
-    console.log('No eligible collection available for a new article today — exiting.');
+    console.log(`No eligible collection available for a new ${articleType} article today — exiting.`);
     return;
   }
 
-  const articleType = pickArticleType();
   console.log(`Selected category: "${collection.title}" — article type: ${articleType}`);
 
   let written;
@@ -182,7 +188,7 @@ async function main() {
     shopifyProductId: collection.id,
     productTitle: written.title,
     productUrl: articleUrl,
-    postType: 'blog_article',
+    postType: `blog_article_${articleType}`,
     platform: 'cartzilla_site',
     caption: written.title,
     imageUrl,
