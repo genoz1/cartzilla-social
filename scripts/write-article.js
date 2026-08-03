@@ -23,6 +23,36 @@ const { isLiveModeEnabled } = require('../lib/safeguards');
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const SITE_URL = process.env.SITE_URL || 'https://cartzillagolfcart.com';
 
+function normalizeForSimilarity(text) {
+  return (text || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+}
+
+function titleSimilarity(a, b) {
+  const wordsA = new Set(normalizeForSimilarity(a));
+  const wordsB = new Set(normalizeForSimilarity(b));
+  if (wordsA.size === 0 || wordsB.size === 0) return 0;
+  const intersection = [...wordsA].filter((w) => wordsB.has(w)).length;
+  const union = new Set([...wordsA, ...wordsB]).size;
+  return union === 0 ? 0 : intersection / union;
+}
+
+// Fetches recent titles in this category (both to steer the AI away from
+// repeating a topic up front, and to double-check the result afterward).
+// Looked at a longer window than the news pipeline's 3 days — a
+// troubleshooting/tutorial topic doesn't go stale the way a news story
+// does, so a duplicate from a month ago is just as much a duplicate as one
+// from yesterday.
+async function fetchRecentTitles(articleType, limit = 30) {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from('cartzilla_articles')
+    .select('title')
+    .eq('category', articleType)
+    .order('published_at', { ascending: false })
+    .limit(limit);
+  return (data || []).map((a) => a.title);
+}
+
 // Weighted so tutorials/troubleshooting (the two most naturally
 // product-grounded, highest search-intent types) come up more often.
 // "News" is deliberately not in this list — see lib/articleWriter.js.
@@ -129,9 +159,25 @@ async function main() {
 
   console.log(`Selected category: "${collection.title}" — article type: ${articleType}`);
 
+  const recentTitles = await fetchRecentTitles(articleType);
+
   let written;
   try {
-    written = await generateArticle(collection, articleType);
+    written = await generateArticle(collection, articleType, recentTitles);
+
+    // Even with the "avoid these" instruction, double-check the actual
+    // result — models don't always follow that instruction perfectly. One
+    // retry, explicitly calling out which title it duplicated, before
+    // giving up and just publishing what we got.
+    let duplicateOf = recentTitles.find((t) => titleSimilarity(written.title, t) >= 0.6);
+    if (duplicateOf) {
+      console.log(`  This came out too similar to an existing article ("${duplicateOf}") — retrying once with that called out explicitly...`);
+      written = await generateArticle(collection, articleType, [...recentTitles, `(too similar to avoid) ${duplicateOf}`]);
+      duplicateOf = recentTitles.find((t) => titleSimilarity(written.title, t) >= 0.6);
+      if (duplicateOf) {
+        console.log(`  [warn] Still similar to "${duplicateOf}" after retrying — publishing anyway rather than looping indefinitely, but flagging this for review.`);
+      }
+    }
   } catch (err) {
     console.error(`[error] Writing failed: ${err.message}`);
     process.exit(1);
