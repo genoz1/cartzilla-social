@@ -352,12 +352,17 @@ footer .wrap {
 .hero-banner-image {
   position: relative;
   z-index: 1;
+  padding: 8px;
 }
 .hero-banner-image img {
   width: 100%;
   display: block;
-  -webkit-mask-image: linear-gradient(to right, transparent, black 14%, black 86%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 14%, black 86%, transparent);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: var(--bg-elevated);
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
 }
 
 .hero-sidebar {
@@ -529,12 +534,8 @@ footer .wrap {
   .hero-banner-grid { grid-template-columns: 1fr; gap: 24px; }
   .hero-banner-image { order: -1; }
   .hero-banner-copy { margin-right: 0; }
-  .hero-banner-image img {
-    mask-image: none;
-    -webkit-mask-image: none;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-  }
+  .hero-banner-image { padding: 0; }
+  .hero-banner-image img { border-radius: 12px; }
   .hero-sidebar { order: 2; }
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-6 { grid-template-columns: repeat(3, 1fr); }

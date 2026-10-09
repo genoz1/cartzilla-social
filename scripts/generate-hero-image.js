@@ -1,35 +1,36 @@
 // One-off: generates and stores an on-brand hero image for the homepage
-// banner. Run once — the resulting URL gets set as CARTZILLA_HERO_IMAGE_URL,
-// not regenerated on every page load.
+// banner. Prefer shipping the result as public/img/homepage-hero.jpg (the
+// live site uses that static asset). Optionally upload to Supabase and set
+// CARTZILLA_HERO_IMAGE_URL if you want a CDN override later.
 //
-// Note this is deliberately different from the article-thumbnail image
-// prompt in lib/imageGen.js — those need to be bright because they're small
-// thumbnails that have to stay visible in a grid. A big hero image is the
-// opposite case: it should look like it belongs to the page, not like a
-// stock photo dropped in a box, so this asks for a dark background that
-// blends into the site instead of a bright environmental scene.
+// Prompt matches the light site theme — bright daylight, never a black
+// studio plate (the old dark hero looked wrong on the light redesign).
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const { storeGeneratedImage } = require('../lib/supabase');
 const { generateImage } = require('../lib/openai');
 
-const PROMPT = `A photorealistic golf cart with a black body and lime-green (#9fbb3b) wheel
-accents and rim lighting, shot in dramatic automotive studio photography style. Tight crop
-— the cart fills most of the frame, photographed at a three-quarter angle. Background is a
-dark, near-black gradient (matching a pure black website background, so the image blends
-into the page rather than looking like an inserted photo) with subtle lime-green rim
-lighting along the cart's edges for depth and drama. No full environmental scene (no trees,
-no path, no daylight) — this is a dark studio product shot, not an outdoor photo. No visible
-brand logos or nameplates on the cart. No readable text anywhere in the image. No people.`;
+const PROMPT = `Photorealistic golf cart for a light professional website hero.
+Modern utility golf cart in graphite and white (not pure black), with subtle
+lime-green (#8fb032) wheel accents. Three-quarter front angle, cart fills most
+of the frame. Bright daytime outdoor setting on a clean paved path with soft
+green fairway and sky — high-key, well-lit, airy. Soft natural sunlight, no
+neon glow, no dark studio, no black background. No brand logos or nameplates.
+No readable text. No people. Clean commercial product photography.`;
 
 async function main() {
-  console.log('Generating hero image...');
+  console.log('Generating light hero image...');
   const buffer = await generateImage(PROMPT);
-  const url = await storeGeneratedImage(buffer, 'homepage-hero.png');
-  if (!url) {
-    console.error('[error] Upload failed.');
-    process.exit(1);
+  const outPath = path.join(__dirname, '..', 'public', 'img', 'homepage-hero.png');
+  fs.writeFileSync(outPath, buffer);
+  console.log(`Wrote ${outPath}`);
+
+  const url = await storeGeneratedImage(buffer, 'homepage-hero-light.png');
+  if (url) {
+    console.log(`Also uploaded: ${url}`);
+    console.log('(Site uses /img/homepage-hero.jpg by default; env override optional.)');
   }
-  console.log(`\nDone! Set this as an environment variable:\n\nCARTZILLA_HERO_IMAGE_URL=${url}\n`);
 }
 
 main().catch((err) => {
