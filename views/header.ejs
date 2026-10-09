@@ -24,7 +24,7 @@
   <link rel="icon" type="image/png" href="/img/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 
   <% if (process.env.GA4_MEASUREMENT_ID) { %>
@@ -76,8 +76,8 @@
       <a href="/videos">How-To Videos</a>
       <a href="<%= typeof shopHomeUrl !== 'undefined' && shopHomeUrl ? shopHomeUrl : '/category/buying-guides' %>">Shop</a>
       <form action="/search" method="GET" style="padding: 14px 20px; display: flex; gap: 8px;">
-        <input type="text" name="q" placeholder="Search Cartzilla..." style="flex: 1; padding: 10px 12px; background: var(--black); border: 1px solid #333; border-radius: 4px; color: var(--white);">
-        <button type="submit" class="btn" style="padding: 10px 16px;">🔍</button>
+        <input type="text" name="q" placeholder="Search Cartzilla..." style="flex: 1; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--ink);">
+        <button type="submit" class="btn" style="padding: 10px 16px;">Search</button>
       </form>
     </div>
   </nav>

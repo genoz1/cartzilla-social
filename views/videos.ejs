@@ -14,10 +14,10 @@
     </p>
 
     <form method="GET" action="/videos" style="margin-bottom: 24px; display: flex; gap: 10px; max-width: 480px;">
-      <input type="text" name="q" value="<%= searchQuery %>" placeholder="Search videos or channels (e.g. battery, EZGO, solenoid)" style="flex: 1; padding: 12px 14px; background: var(--near-black); border: 1px solid #262626; border-radius: 4px; color: var(--white); font-size: 15px;">
+      <input type="text" name="q" value="<%= searchQuery %>" placeholder="Search videos or channels (e.g. battery, EZGO, solenoid)" style="flex: 1; padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); font-size: 15px;">
       <button type="submit" class="btn">Search</button>
       <% if (searchQuery) { %>
-        <a href="/videos" class="btn" style="background: transparent; border: 1px solid var(--lime); color: var(--lime);">Clear</a>
+        <a href="/videos" class="btn btn-outline">Clear</a>
       <% } %>
     </form>
 
