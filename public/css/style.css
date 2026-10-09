@@ -10,9 +10,9 @@
   --bg-elevated: #ffffff;
   --bg-muted: #e8ece3;
   --bg-hero: linear-gradient(160deg, #eef4d8 0%, #f4f6f2 42%, #e7ebe4 100%);
-  --ink: #1c2118;
-  --ink-secondary: #3d4636;
-  --ink-muted: #6b7462;
+  --ink: #1f2420;
+  --ink-secondary: #4a5246;
+  --ink-muted: #6e7668;
   --border: #d5dccb;
   --border-strong: #b8c4a4;
   --shadow: 0 1px 2px rgba(28, 33, 24, 0.06), 0 8px 24px rgba(28, 33, 24, 0.06);
