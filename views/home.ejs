@@ -7,7 +7,7 @@
       <p>News, guides, tutorials, and expert reviews to help you buy, build, and maintain the perfect golf cart.</p>
       <div class="hero-banner-ctas">
         <a href="/category/tutorials" class="btn">Browse Guides &rarr;</a>
-        <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>" class="btn btn-outline">Shop Parts</a>
+        <a href="<%= typeof shopHomeUrl !== 'undefined' && shopHomeUrl ? shopHomeUrl : '/category/buying-guides' %>" class="btn btn-outline"><%= typeof shopHomeUrl !== 'undefined' && shopHomeUrl ? 'Shop Parts' : 'Buying Guides' %></a>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
       </a>
       <a href="/category/reviews" class="sidebar-topic">
         <span class="sidebar-topic-name">Reviews</span>
-        <span class="sidebar-topic-desc">Expert tested</span>
+        <span class="sidebar-topic-desc">What to look for</span>
       </a>
       <a href="/videos" class="sidebar-topic">
         <span class="sidebar-topic-name">How-To Videos</span>

@@ -507,3 +507,20 @@ footer .wrap {
   .grid-4 { grid-template-columns: 1fr; }
   .grid-6 { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Affiliate / monetization */
+.affiliate-disclosure, .affiliate-note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #b0b0b0;
+  margin-top: 14px;
+}
+.affiliate-disclosure {
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 18px 0;
+  background: #141414;
+}
+.affiliate-cta { margin: 22px 0; }
+.product-cta .affiliate-note { margin-top: 10px; }

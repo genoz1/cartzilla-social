@@ -1,18 +1,15 @@
-// Writes a general-topic article (grounded in a product CATEGORY for
-// inspiration, not one specific product), publishes it into the
-// cartzilla_articles table, and announces it across all four social
-// platforms. Uses an AI-generated image (bright, on-brand, never
-// dark/black-background — see lib/imageGen.js) rather than a real product
-// photo, and embeds a "shop this category" banner roughly mid-article
-// rather than a plain inline text link. Rotation for these articles is
-// tracked independently from the social-only post types via the postTypes
-// filter in lib/rotation.js, using its own 'blog_article' post type.
+// Writes a general-topic article, publishes it into cartzilla_articles,
+// and optionally announces it on social. Topics come from the static
+// catalog in lib/topics.js (Shopify-independent). Affiliate CTAs are
+// built only when credentials exist; otherwise banners stay informational.
 require('dotenv').config();
 const { supabase, storeGeneratedImage } = require('../lib/supabase');
-const { fetchEligibleCollections } = require('../lib/shopify');
+const { listTopics } = require('../lib/topics');
 const { pickNextCollection } = require('../lib/rotation');
 const { generateArticle, insertMidArticleBanner } = require('../lib/articleWriter');
 const { generateArticleImage } = require('../lib/imageGen');
+const { buildTopicCta, disclosureHtml, amazonSearchUrl, affiliateReady } = require('../lib/affiliate');
+const { textProvider } = require('../lib/ai');
 const { postToFacebookPage } = require('../lib/facebook');
 const { createPost: postToInstagram } = require('../lib/instagram');
 const { createPost: postToThreads } = require('../lib/threads');
@@ -36,12 +33,6 @@ function titleSimilarity(a, b) {
   return union === 0 ? 0 : intersection / union;
 }
 
-// Fetches recent titles in this category (both to steer the AI away from
-// repeating a topic up front, and to double-check the result afterward).
-// Looked at a longer window than the news pipeline's 3 days — a
-// troubleshooting/tutorial topic doesn't go stale the way a news story
-// does, so a duplicate from a month ago is just as much a duplicate as one
-// from yesterday.
 async function fetchRecentTitles(articleType, limit = 30) {
   if (!supabase) return [];
   const { data } = await supabase
@@ -53,15 +44,9 @@ async function fetchRecentTitles(articleType, limit = 30) {
   return (data || []).map((a) => a.title);
 }
 
-// Weighted so tutorials/troubleshooting (the two most naturally
-// product-grounded, highest search-intent types) come up more often.
-// "News" is deliberately not in this list — see lib/articleWriter.js.
 const ARTICLE_TYPE_WEIGHTS = { tutorials: 35, troubleshooting: 30, 'buying-guides': 20, reviews: 15 };
 const VALID_TYPES = Object.keys(ARTICLE_TYPE_WEIGHTS);
 
-// Set ARTICLE_TYPE (e.g. ARTICLE_TYPE=tutorials) to force a specific type
-// instead of the normal random weighted pick — used for the dedicated
-// tutorial/troubleshooting commands and their own schedule.
 function pickArticleType() {
   const forced = process.env.ARTICLE_TYPE;
   if (forced) {
@@ -103,16 +88,6 @@ async function generateUniqueSlug(baseTitle) {
   }
 }
 
-function buildCategoryBanner(collection) {
-  return `
-<div class="category-banner">
-  <p class="category-banner-label">🛒 Shop ${collection.title}</p>
-  <p>See current options in this category on Cartzilla.</p>
-  <a href="${collection.url}" class="btn" target="_blank" rel="noopener">Browse ${collection.title} &rarr;</a>
-</div>
-`;
-}
-
 async function announceOnSocial({ articleTitle, articleUrl, imageUrl, dek, logMeta }) {
   const facebookMessage = `New on the blog: ${articleTitle}\n\n${dek}\n\n${articleUrl}`;
   const instagramCaption = `${articleTitle}\n\n${dek}\n\nFull guide — link in bio.`;
@@ -136,46 +111,38 @@ async function announceOnSocial({ articleTitle, articleUrl, imageUrl, dek, logMe
 async function main() {
   console.log(`\n=== Cartzilla article writer — ${new Date().toISOString()} ===`);
   console.log(`Live mode: ${isLiveModeEnabled() ? 'ON' : 'off (dry-run only)'}`);
+  console.log(`Text AI provider: ${textProvider() || 'none'}`);
+  console.log(`Affiliate tag configured: ${affiliateReady() ? 'yes' : 'no (CTA links will omit tracking)'}`);
 
-  const collections = await fetchEligibleCollections();
-  console.log(`Found ${collections.length} eligible collection(s).`);
-  if (collections.length === 0) {
-    console.log('No eligible collections — exiting.');
+  const topics = listTopics();
+  console.log(`Found ${topics.length} static topic(s) (Shopify-independent).`);
+  if (topics.length === 0) {
+    console.log('No topics configured — exiting.');
     return;
   }
 
   const articleType = pickArticleType();
-
-  // Type-specific rotation pool (e.g. 'blog_article_tutorials' vs
-  // 'blog_article_troubleshooting') rather than one shared 'blog_article'
-  // bucket — otherwise a collection used for a tutorial today would also
-  // be blocked from getting a buying guide today, needlessly shrinking the
-  // pool when you have several types running the same day.
-  const collection = await pickNextCollection(collections, { postTypes: [`blog_article_${articleType}`] });
-  if (!collection) {
-    console.log(`No eligible collection available for a new ${articleType} article today — exiting.`);
+  const topic = await pickNextCollection(topics, { postTypes: [`blog_article_${articleType}`] });
+  if (!topic) {
+    console.log(`No eligible topic available for a new ${articleType} article today — exiting.`);
     return;
   }
 
-  console.log(`Selected category: "${collection.title}" — article type: ${articleType}`);
+  console.log(`Selected topic: "${topic.title}" — article type: ${articleType}`);
 
   const recentTitles = await fetchRecentTitles(articleType);
 
   let written;
   try {
-    written = await generateArticle(collection, articleType, recentTitles);
+    written = await generateArticle(topic, articleType, recentTitles);
 
-    // Even with the "avoid these" instruction, double-check the actual
-    // result — models don't always follow that instruction perfectly. One
-    // retry, explicitly calling out which title it duplicated, before
-    // giving up and just publishing what we got.
     let duplicateOf = recentTitles.find((t) => titleSimilarity(written.title, t) >= 0.6);
     if (duplicateOf) {
-      console.log(`  This came out too similar to an existing article ("${duplicateOf}") — retrying once with that called out explicitly...`);
-      written = await generateArticle(collection, articleType, [...recentTitles, `(too similar to avoid) ${duplicateOf}`]);
+      console.log(`  This came out too similar to an existing article ("${duplicateOf}") — retrying once...`);
+      written = await generateArticle(topic, articleType, [...recentTitles, `(too similar to avoid) ${duplicateOf}`]);
       duplicateOf = recentTitles.find((t) => titleSimilarity(written.title, t) >= 0.6);
       if (duplicateOf) {
-        console.log(`  [warn] Still similar to "${duplicateOf}" after retrying — publishing anyway rather than looping indefinitely, but flagging this for review.`);
+        console.log(`  [warn] Still similar to "${duplicateOf}" after retrying — publishing anyway.`);
       }
     }
   } catch (err) {
@@ -183,27 +150,28 @@ async function main() {
     process.exit(1);
   }
 
-  const bannerHtml = buildCategoryBanner(collection);
+  const bannerHtml = buildTopicCta(topic) + disclosureHtml();
   const bodyWithBanner = insertMidArticleBanner(written.body_html, bannerHtml);
+  const outboundUrl = amazonSearchUrl(topic.amazonSearch || topic.title);
 
   const slug = await generateUniqueSlug(written.meta_title || written.title);
   const articleUrl = `${SITE_URL}/article/${slug}`;
 
-  console.log('Generating a real, topic-specific image (bright, on-brand — not a product photo)...');
+  console.log('Generating a topic-specific image (bright, on-brand)...');
   const imageBuffer = await generateArticleImage({ title: written.title, category: articleType });
   let imageUrl = null;
   if (imageBuffer && !DRY_RUN) {
     imageUrl = await storeGeneratedImage(imageBuffer, `article-${slug}.png`);
   }
-  if (!imageUrl) imageUrl = collection.imageUrl; // fall back to a real category photo if generation failed
+  if (!imageUrl) imageUrl = topic.imageUrl || null;
 
   if (DRY_RUN) {
     console.log(`[dry-run] Title: ${written.title}`);
     console.log(`[dry-run] Category: ${articleType}`);
-    console.log(`[dry-run] Would link banner to: ${collection.title} (${collection.url})`);
-    console.log(`[dry-run] Would use image: ${imageBuffer ? '(newly generated)' : `(fallback: ${collection.imageUrl})`}`);
-    console.log(`[dry-run] Body with banner:\n${bodyWithBanner}`);
-    console.log('[dry-run] Would announce on Facebook, Instagram, Threads, and Pinterest.');
+    console.log(`[dry-run] Outbound CTA: ${outboundUrl || '(none)'}`);
+    console.log(`[dry-run] Would use image: ${imageBuffer ? '(newly generated)' : '(none / placeholder)'}`);
+    console.log(`[dry-run] Body with banner:\n${bodyWithBanner.slice(0, 1200)}...`);
+    console.log('[dry-run] Would announce on social unless SKIP_SOCIAL=true.');
     return;
   }
 
@@ -220,8 +188,8 @@ async function main() {
     body_html: bodyWithBanner,
     category: articleType,
     image_url: imageUrl,
-    product_url: collection.url,
-    product_title: collection.title,
+    product_url: outboundUrl,
+    product_title: topic.title,
   });
 
   if (error) {
@@ -231,7 +199,7 @@ async function main() {
   console.log(`Published: ${articleUrl}`);
 
   await logPost({
-    shopifyProductId: collection.id,
+    shopifyProductId: topic.id,
     productTitle: written.title,
     productUrl: articleUrl,
     postType: `blog_article_${articleType}`,
@@ -241,7 +209,7 @@ async function main() {
     status: 'success',
   });
 
-  const logMeta = { shopifyProductId: collection.id, productTitle: written.title, productUrl: articleUrl, postType: 'blog_article_announcement' };
+  const logMeta = { shopifyProductId: topic.id, productTitle: written.title, productUrl: articleUrl, postType: 'blog_article_announcement' };
   if (process.env.SKIP_SOCIAL === 'true') {
     console.log('SKIP_SOCIAL is set — article saved to the site but not announced on social.');
   } else {

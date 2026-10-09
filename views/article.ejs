@@ -24,9 +24,10 @@
 
     <% if (article.product_url) { %>
     <div class="product-cta">
-      <p style="margin: 0 0 4px; font-weight: 600;">Related product</p>
-      <p style="margin: 0 0 10px;"><%= article.product_title || 'See this on Cartzilla' %></p>
-      <a href="<%= article.product_url %>" class="btn" target="_blank" rel="noopener">View on Cartzilla &rarr;</a>
+      <p style="margin: 0 0 4px; font-weight: 600;">Related options</p>
+      <p style="margin: 0 0 10px;"><%= article.product_title || 'Browse related products' %></p>
+      <a href="<%= article.product_url %>" class="btn" target="_blank" rel="<%= String(article.product_url).includes('amazon.') ? 'sponsored noopener' : 'noopener' %>">See current options &rarr;</a>
+      <p class="affiliate-note">Affiliate links may earn Cartzilla a commission. We do not invent prices, stock, or hands-on test results.</p>
     </div>
     <% } %>
 

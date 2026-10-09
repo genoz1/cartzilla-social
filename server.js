@@ -2,20 +2,30 @@ require('dotenv').config();
 const express = require('express');
 const cron = require('node-cron');
 const path = require('path');
+const { hasTextAI, textProvider } = require('./lib/ai');
+const { shopifyEnabled, shopHomeUrl } = require('./lib/affiliate');
 
 const app = express();
 const PORT = process.env.PORT || 8081;
 
 app.set('view engine', 'ejs');
+// Locals available to every EJS template (Shop link softens when paused).
+app.use((req, res, next) => {
+  res.locals.shopHomeUrl = shopHomeUrl();
+  res.locals.shopifyEnabled = shopifyEnabled();
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', require('./routes/main'));
 
-// Simple health endpoint so you (or an uptime monitor) can confirm the
-// service is up and see whether live posting is armed.
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     liveMode: process.env.CARTZILLA_LIVE_MODE === 'true',
+    textAi: textProvider(),
+    shopifyEnabled: shopifyEnabled(),
+    writeArticlesEnabled: process.env.CARTZILLA_WRITE_ARTICLES_ENABLED === 'true',
+    writeNewsEnabled: process.env.CARTZILLA_WRITE_NEWS_ENABLED === 'true',
     time: new Date().toISOString(),
   });
 });
@@ -24,120 +34,87 @@ app.listen(PORT, () => {
   console.log(`Cartzilla running on port ${PORT}`);
 });
 
-const hasShopifyCreds = !!(process.env.CARTZILLA_SHOPIFY_STORE_DOMAIN && process.env.CARTZILLA_SHOPIFY_CLIENT_ID && process.env.CARTZILLA_SHOPIFY_CLIENT_SECRET);
-const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
 const hasSupabase = !!(process.env.CARTZILLA_SUPABASE_URL && process.env.CARTZILLA_SUPABASE_SERVICE_KEY);
+const hasShopifyCreds = !!(
+  process.env.CARTZILLA_SHOPIFY_STORE_DOMAIN &&
+  process.env.CARTZILLA_SHOPIFY_CLIENT_ID &&
+  process.env.CARTZILLA_SHOPIFY_CLIENT_SECRET
+);
+// Product social posts still need Shopify; content publishing does not.
+const shopifySocialArmed = hasShopifyCreds && shopifyEnabled() && hasTextAI() && hasSupabase;
+const contentArmed = hasTextAI() && hasSupabase;
 
-// Both scheduled jobs require Shopify + Anthropic + Supabase to be
-// configured at minimum. Whether they actually PUBLISH anything further
-// depends on CARTZILLA_LIVE_MODE=true, checked separately inside each
-// platform posting library (lib/facebook.js, etc.) — so even if this cron
-// fires, nothing goes out live unless that switch is explicitly on.
-if (hasShopifyCreds && hasAnthropicKey && hasSupabase) {
+function runScript(label, command) {
+  console.log(label);
+  require('child_process').exec(command, (err, stdout, stderr) => {
+    if (stdout) console.log(stdout);
+    if (stderr) console.error(stderr);
+    if (err) console.error(`[error] ${label}: ${err.message}`);
+  });
+}
+
+if (shopifySocialArmed) {
   cron.schedule('0 10 * * *', () => {
-    console.log('Running scheduled Cartzilla educational post...');
-    require('child_process').exec('node scripts/post-educational.js', (err, stdout, stderr) => {
-      if (stdout) console.log(stdout);
-      if (stderr) console.error(stderr);
-    });
+    runScript('Running scheduled Cartzilla educational post...', 'node scripts/post-educational.js');
   }, { timezone: 'America/New_York' });
 
   cron.schedule('0 18 * * *', () => {
-    console.log('Running scheduled Cartzilla spotlight post...');
-    require('child_process').exec('node scripts/post-spotlight.js', (err, stdout, stderr) => {
-      if (stdout) console.log(stdout);
-      if (stderr) console.error(stderr);
-    });
+    runScript('Running scheduled Cartzilla spotlight post...', 'node scripts/post-spotlight.js');
   }, { timezone: 'America/New_York' });
 
-  // Opt-in separately from the master schedule above: this content is
-  // general repair/diagnostic knowledge, not grounded in your Shopify
-  // product data like the other two, so it's worth reviewing via
-  // `npm run test-mode-category` before turning this on. Only arms once
-  // you explicitly set CARTZILLA_CATEGORY_HOWTO_ENABLED=true.
   if (process.env.CARTZILLA_CATEGORY_HOWTO_ENABLED === 'true') {
     cron.schedule('0 14 * * *', () => {
-      console.log('Running scheduled Cartzilla category how-to post...');
-      require('child_process').exec('node scripts/post-category-howto.js', (err, stdout, stderr) => {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-      });
+      runScript('Running scheduled Cartzilla category how-to post...', 'node scripts/post-category-howto.js');
     }, { timezone: 'America/New_York' });
     console.log('Cartzilla category how-to post also scheduled: 2pm Eastern daily.');
   }
 
-  console.log(`Cartzilla posts scheduled: 10am (educational) and 6pm (spotlight) Eastern daily. LIVE MODE is ${process.env.CARTZILLA_LIVE_MODE === 'true' ? 'ON — real posts will publish.' : 'OFF — runs will log/dry-run only.'}`);
+  console.log(`Cartzilla Shopify social posts scheduled: 10am + 6pm ET. LIVE MODE is ${process.env.CARTZILLA_LIVE_MODE === 'true' ? 'ON' : 'OFF'}.`);
+} else {
+  console.log('Cartzilla Shopify social posts NOT scheduled (store paused / missing Shopify creds, or AI/Supabase missing). Content publishing can still run independently.');
+}
 
-  // Opt-in separately: writes a real article to the content site
-  // (cartzilla_articles) and announces it on all 4 platforms — a bigger
-  // action than a social caption, so review a dry-run batch first via
-  // `npm run write-article:dry` before setting this true.
+if (contentArmed) {
   if (process.env.CARTZILLA_WRITE_ARTICLES_ENABLED === 'true') {
-    // Tutorial and Troubleshooting each run twice a day — morning batch
-    // and afternoon batch, a few minutes apart so they don't both hit the
-    // AI/Shopify APIs at the exact same second.
+    // Keep schedule modest: 1 tutorial + 1 troubleshooting per day (not 4)
+    // to control OpenAI spend after the migration repair.
     cron.schedule('0 8 * * *', () => {
-      console.log('Running scheduled Cartzilla tutorial writer (AM)...');
-      require('child_process').exec('ARTICLE_TYPE=tutorials node scripts/write-article.js', (err, stdout, stderr) => {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-      });
+      runScript('Running scheduled Cartzilla tutorial writer...', 'ARTICLE_TYPE=tutorials SKIP_SOCIAL=true node scripts/write-article.js');
     }, { timezone: 'America/New_York' });
 
     cron.schedule('15 8 * * *', () => {
-      console.log('Running scheduled Cartzilla troubleshooting writer (AM)...');
-      require('child_process').exec('ARTICLE_TYPE=troubleshooting node scripts/write-article.js', (err, stdout, stderr) => {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-      });
+      runScript('Running scheduled Cartzilla troubleshooting writer...', 'ARTICLE_TYPE=troubleshooting SKIP_SOCIAL=true node scripts/write-article.js');
     }, { timezone: 'America/New_York' });
 
-    cron.schedule('0 14 * * *', () => {
-      console.log('Running scheduled Cartzilla tutorial writer (PM)...');
-      require('child_process').exec('ARTICLE_TYPE=tutorials node scripts/write-article.js', (err, stdout, stderr) => {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-      });
+    // Buying guides once daily (afternoon) — affiliate-ready topics.
+    cron.schedule('0 13 * * *', () => {
+      runScript('Running scheduled Cartzilla buying-guide writer...', 'ARTICLE_TYPE=buying-guides SKIP_SOCIAL=true node scripts/write-article.js');
     }, { timezone: 'America/New_York' });
 
-    cron.schedule('15 14 * * *', () => {
-      console.log('Running scheduled Cartzilla troubleshooting writer (PM)...');
-      require('child_process').exec('ARTICLE_TYPE=troubleshooting node scripts/write-article.js', (err, stdout, stderr) => {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-      });
-    }, { timezone: 'America/New_York' });
-
-    console.log('Cartzilla tutorial + troubleshooting writers scheduled: 8am/8:15am and 2pm/2:15pm Eastern daily (twice each).');
+    console.log('Cartzilla content writers scheduled: tutorial 8am, troubleshooting 8:15am, buying-guide 1pm ET (SKIP_SOCIAL default).');
   }
 
-  // Opt-in separately: pulls from real golf cart industry RSS sources
-  // (scripts/sources.js) and writes honest, source-credited news summaries.
-  // Review a dry-run batch via `npm run write-news:dry` before enabling.
   if (process.env.CARTZILLA_WRITE_NEWS_ENABLED === 'true') {
     cron.schedule('30 7 * * *', () => {
-      console.log('Running scheduled Cartzilla news writer...');
-      require('child_process').exec('node scripts/write-news.js', (err, stdout, stderr) => {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-      });
+      runScript('Running scheduled Cartzilla news writer...', 'node scripts/write-news.js');
     }, { timezone: 'America/New_York' });
-    console.log('Cartzilla news writer also scheduled: 7:30am Eastern daily (once).');
+    console.log('Cartzilla news writer scheduled: 7:30am Eastern daily.');
   }
 
-  // Opt-in separately: checks trusted YouTube channels weekly for new
-  // how-to videos and adds them automatically. Needs YOUTUBE_API_KEY set.
-  // Review with `npm run check-new-videos:dry` before enabling.
   if (process.env.CARTZILLA_CHECK_VIDEOS_ENABLED === 'true') {
     cron.schedule('0 7 * * 1', () => {
-      console.log('Running scheduled Cartzilla video checker...');
-      require('child_process').exec('node scripts/check-new-videos.js', (err, stdout, stderr) => {
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-      });
+      runScript('Running scheduled Cartzilla video checker...', 'node scripts/check-new-videos.js');
     }, { timezone: 'America/New_York' });
-    console.log('Cartzilla video checker also scheduled: Mondays 7am Eastern.');
+    console.log('Cartzilla video checker scheduled: Mondays 7am Eastern.');
+  }
+
+  if (
+    process.env.CARTZILLA_WRITE_ARTICLES_ENABLED !== 'true' &&
+    process.env.CARTZILLA_WRITE_NEWS_ENABLED !== 'true' &&
+    process.env.CARTZILLA_CHECK_VIDEOS_ENABLED !== 'true'
+  ) {
+    console.log('Content AI ready, but no CARTZILLA_WRITE_* / CHECK_VIDEOS flags enabled yet.');
   }
 } else {
-  console.log('Cartzilla posting NOT scheduled — set CARTZILLA_SHOPIFY_STORE_DOMAIN, CARTZILLA_SHOPIFY_CLIENT_ID, CARTZILLA_SHOPIFY_CLIENT_SECRET, ANTHROPIC_API_KEY, CARTZILLA_SUPABASE_URL, and CARTZILLA_SUPABASE_SERVICE_KEY to enable.');
+  console.log('Cartzilla content publishing NOT scheduled — set OPENAI_API_KEY (preferred) or ANTHROPIC_API_KEY, plus CARTZILLA_SUPABASE_URL and CARTZILLA_SUPABASE_SERVICE_KEY.');
 }

@@ -3,7 +3,7 @@
       <span>&copy; <%= new Date().getFullYear() %> Cartzilla. Golf cart news, tutorials, and buying guides.</span>
       <span>
         <a href="/about">About</a> &middot;
-        <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop Parts & Accessories</a>
+        <a href="<%= typeof shopHomeUrl !== 'undefined' && shopHomeUrl ? shopHomeUrl : '/category/buying-guides' %>"><%= typeof shopHomeUrl !== 'undefined' && shopHomeUrl ? 'Shop Parts & Accessories' : 'Buying Guides' %></a>
       </span>
     </div>
   </footer>

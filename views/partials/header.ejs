@@ -57,7 +57,7 @@
         <a href="/category/buying-guides" class="<%= typeof category !== 'undefined' && category === 'buying-guides' ? 'active' : '' %>">Buying Guides</a>
         <a href="/category/reviews" class="<%= typeof category !== 'undefined' && category === 'reviews' ? 'active' : '' %>">Reviews</a>
         <a href="/videos" class="<%= typeof category !== 'undefined' && category === 'videos' ? 'active' : '' %>">How-To Videos</a>
-        <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop</a>
+        <a href="<%= typeof shopHomeUrl !== 'undefined' && shopHomeUrl ? shopHomeUrl : '/category/buying-guides' %>">Shop</a>
       </div>
       <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
         <span></span><span></span><span></span>
@@ -70,7 +70,7 @@
       <a href="/category/buying-guides">Buying Guides</a>
       <a href="/category/reviews">Reviews</a>
       <a href="/videos">How-To Videos</a>
-      <a href="<%= process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN ? 'https://' + process.env.CARTZILLA_SHOPIFY_PUBLIC_DOMAIN : '#' %>">Shop</a>
+      <a href="<%= typeof shopHomeUrl !== 'undefined' && shopHomeUrl ? shopHomeUrl : '/category/buying-guides' %>">Shop</a>
     </div>
   </nav>
 

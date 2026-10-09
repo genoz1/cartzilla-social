@@ -30,3 +30,27 @@ create index if not exists cartzilla_post_log_posted_idx
 -- posted_at ranges by hand.
 create index if not exists cartzilla_post_log_caption_idx
   on cartzilla_post_log (caption);
+
+-- Published site content (news, tutorials, troubleshooting, buying-guides, reviews).
+-- Already present in production; kept here so a fresh Cartzilla Supabase project
+-- can recreate the table. Do not drop or rename columns used by live URLs/slugs.
+create table if not exists cartzilla_articles (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  meta_title text,
+  dek text,
+  body_html text not null,
+  category text not null,           -- 'news' | 'tutorials' | 'troubleshooting' | 'buying-guides' | 'reviews'
+  image_url text,
+  product_url text,                 -- outbound affiliate / retailer URL when present
+  product_title text,
+  source_name text,                 -- news attribution
+  source_url text,
+  published_at timestamptz default now()
+);
+
+create index if not exists cartzilla_articles_category_idx
+  on cartzilla_articles (category);
+create index if not exists cartzilla_articles_published_idx
+  on cartzilla_articles (published_at desc);
